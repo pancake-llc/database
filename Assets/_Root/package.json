@@ -1,0 +1,23 @@
+{
+  "name": "com.snorlax.database",
+  "displayName": "Database",
+  "description": "Provide friendly and useful edit or create game database for Unity 3D using NoSQL Document Store in a single data file",
+  "version": "0.0.1",
+  "unity": "2020.1",
+  "author": {
+    "name": "Snorlax",
+    "email": "phongsoyenmoc.diep@gmail.com",
+    "url": "https://github.com/yenmoc"
+  },
+  "license": "MIT",
+  "dependencies": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:snorluxe/database.git",
+    "directory": "com.snorlax.database"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/@snorluxe"
+  }
+}
