@@ -1,5 +1,6 @@
 using Snorlax.Editor;
 using UnityEditor;
+using UnityEngine;
 
 namespace Snorlax.Database.Editor
 {
@@ -15,7 +16,13 @@ namespace Snorlax.Database.Editor
 
         private void PlayModeStateChanged(PlayModeStateChange stateChange) { }
 
-        private void OnGUI() { }
+        private void OnGUI()
+        {
+            if (GUILayout.Button("Connect"))
+            {
+                ConnectionDatabaseEditorStatic.Show();
+            }
+        }
 
 
         private void OnDisable()
@@ -28,7 +35,7 @@ namespace Snorlax.Database.Editor
     public static class DatabaseEditorStatic
     {
         [MenuItem("Tools/Snorlax/Show Database &_d")]
-        private static void ShowWindow()
+        private static void Show()
         {
             var window = EditorWindow.GetWindow<DatabaseEditor>("Database", true, UtilEditor.GetInspectorWindowType());
             if (window != null)
