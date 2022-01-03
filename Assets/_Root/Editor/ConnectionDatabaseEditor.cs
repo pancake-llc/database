@@ -25,9 +25,12 @@ namespace Snorlax.Database.Editor
         private List<string> _culture;
         private string _cacheSort = "";
         private string _cacheCulture = "";
+        private Action<string> _onConnectAction;
 
-        public void Initialize()
+        public void Initialize(ConnectionString connectionString, Action<string> connectAction)
         {
+            _connectionString = connectionString;
+            _onConnectAction = connectAction;
             _sort = new List<string> {""};
             _sort.AddRange(Enum.GetNames(typeof(CompareOptions)));
 
@@ -41,16 +44,13 @@ namespace Snorlax.Database.Editor
 
         private void Connect()
         {
-            _connectionString = new ConnectionString
-            {
-                Connection = _connectionType,
-                Filename = _fileName,
-                ReadOnly = _isReadOnly,
-                Upgrade = false,
-                Password = _password,
-                InitialSize = _initilizeSize * MB,
-                Collation = new Collation($"{_cacheCulture}/{_cacheSort}")
-            };
+            _connectionString.Connection = _connectionType;
+            _connectionString.Filename = _fileName;
+            _connectionString.ReadOnly = _isReadOnly;
+            _connectionString.Upgrade = false;
+            _connectionString.Password = _password;
+            _connectionString.InitialSize = _initilizeSize * MB;
+            _connectionString.Collation = new Collation($"{_cacheCulture}/{_cacheSort}");
 
             SettingManager.Settings.LastConnectionStrings = _connectionString;
             SettingManager.AddToRecentList(_connectionString);
@@ -78,7 +78,7 @@ namespace Snorlax.Database.Editor
                 {
                     EditorGUILayout.BeginHorizontal();
                     _fileName = GUILayout.TextField(_fileName);
-                    ConnectionDatabaseEditorStatic.PickFilePath(ref _fileName, style: EditorStyles.colorField);
+                    UtilEditor.PickFilePath(ref _fileName, style: EditorStyles.colorField);
                     EditorGUILayout.EndHorizontal();
                     EditorGUILayout.Space(4);
                 });
@@ -155,39 +155,15 @@ namespace Snorlax.Database.Editor
 
     public static class ConnectionDatabaseEditorStatic
     {
-        public static void Show()
+        public static ConnectionDatabaseEditor Show(ConnectionString connectionString, Action<string> connectAction)
         {
             var window = EditorWindow.GetWindow<ConnectionDatabaseEditor>("Connection Manager", true);
             window.minSize = new Vector2(550, 350);
-            if (window != null)
-            {
-                window.Initialize();
-                window.Show(true);
-            }
-        }
+            if (window == null) return window;
+            window.Initialize(connectionString, connectAction);
+            window.Show(true);
 
-        /// <summary>
-        /// Show panel to pickup file
-        /// </summary>
-        /// <param name="pathResult"></param>
-        /// <param name="keySave"></param>
-        /// <param name="style"></param>
-        public static void PickFilePath(ref string pathResult, string keySave = "", GUIStyle style = null)
-        {
-            GUI.backgroundColor = Color.gray;
-            if (GUILayout.Button(new GUIContent("", "Select File"), style, GUILayout.Width(18), GUILayout.Height(18)))
-            {
-                var path = EditorUtility.OpenFilePanel("Select file", pathResult, ".db");
-                if (!string.IsNullOrEmpty(path))
-                {
-                    pathResult = path;
-                    if (!string.IsNullOrEmpty(keySave)) EditorPrefs.SetString(keySave, pathResult);
-                }
-
-                GUI.FocusControl(null);
-            }
-
-            GUI.backgroundColor = Color.white;
+            return window;
         }
     }
 }
