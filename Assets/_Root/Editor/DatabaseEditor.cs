@@ -1,9 +1,12 @@
 using System;
 using System.Collections;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using LiteDB;
 using Snorlax.Editor;
 using UnityEditor;
+using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
 namespace Snorlax.Database.Editor
@@ -16,8 +19,12 @@ namespace Snorlax.Database.Editor
         private bool _enableButtonHeader = true;
         private bool _isConnected = false;
 
+        [SerializeField] private TreeViewState _treeViewState;
+        private DbCollectionTreeView _treeView;
+
         public void Initialize()
         {
+            _treeViewState ??= new TreeViewState();
             SceneView.duringSceneGui += DuringSceneGUI;
             EditorApplication.playModeStateChanged += PlayModeStateChanged;
         }
@@ -28,8 +35,10 @@ namespace Snorlax.Database.Editor
 
         private void OnGUI()
         {
-            #region header
+            _treeView ??= new DbCollectionTreeView(_treeViewState);
 
+            #region header
+            
             EditorGUILayout.Space(2);
             EditorGUILayout.BeginHorizontal();
             if (!_enableButtonHeader) GUI.enabled = false;
@@ -70,11 +79,12 @@ namespace Snorlax.Database.Editor
             #region hierarchy
 
             EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.Width(200), GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(true));
-            EditorGUILayout.LabelField("Hierarchy",
+            EditorGUILayout.LabelField("Tree View",
                 new GUIStyle(EditorStyles.label) {alignment = TextAnchor.UpperCenter, fontSize = 13, richText = true, contentOffset = new Vector2(0, -2)},
                 GUILayout.Height(16));
             // todo show db tree
 
+            _treeView?.OnGUI(GUILayoutUtility.GetRect(0, 100000, 0, 100000));
             EditorGUILayout.EndVertical();
 
             #endregion
@@ -122,7 +132,7 @@ namespace Snorlax.Database.Editor
             {
                 _db?.Dispose();
                 _db = null;
-                
+
                 EditorUtility.DisplayDialog("Connecting Error", e.Message, "Ok");
                 return;
             }
@@ -136,6 +146,7 @@ namespace Snorlax.Database.Editor
             _isConnected = true;
             await Task.Delay(100);
             _status = "";
+            LoadTreeView();
         }
 
         private async void Disconnect()
@@ -163,6 +174,22 @@ namespace Snorlax.Database.Editor
         private void PopulateRecentList()
         {
             var recents = SettingManager.Settings.RecentConnectionStrings;
+        }
+
+        private void LoadTreeView()
+        {
+            _treeView.Items.Clear();
+            _treeView.Items.Add(new TreeViewItem() {id = 1, depth = 0, displayName = Path.GetFileName(_connectionString.Filename)});
+
+            var sc = _db.GetCollection("$cols").Query().Where("type = 'system'").OrderBy("name").ToDocuments().ToArray();
+
+            for (int i = 0; i < sc.Length; i++)
+            {
+                _treeView.Items.Add(new TreeViewItem() {id = i + 2, depth = 1, displayName = sc[i]["name"].AsString});
+            }
+            
+            _treeView.Reload();
+            _treeView.ExpandAll();
         }
 
         #endregion
