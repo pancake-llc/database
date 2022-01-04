@@ -23,11 +23,11 @@ namespace Snorlax.Database.Editor
         private int _cacheSelectedMode;
         private List<string> _sort;
         private List<string> _culture;
-        private string _cacheSort = "";
-        private string _cacheCulture = "";
-        private Action<string> _onConnectAction;
+        private string _cacheSort = "IgnoreCase";
+        private string _cacheCulture = "en-US";
+        private Action<ConnectionString> _onConnectAction;
 
-        public void Initialize(ConnectionString connectionString, Action<string> connectAction)
+        public void Initialize(ConnectionString connectionString, Action<ConnectionString> connectAction)
         {
             _connectionString = connectionString;
             _onConnectAction = connectAction;
@@ -54,6 +54,9 @@ namespace Snorlax.Database.Editor
 
             SettingManager.Settings.LastConnectionStrings = _connectionString;
             SettingManager.AddToRecentList(_connectionString);
+            
+            _onConnectAction?.Invoke(_connectionString);
+            Close();
         }
 
         private void OnGUI()
@@ -78,7 +81,7 @@ namespace Snorlax.Database.Editor
                 {
                     EditorGUILayout.BeginHorizontal();
                     _fileName = GUILayout.TextField(_fileName);
-                    UtilEditor.PickFilePath(ref _fileName, style: EditorStyles.colorField);
+                    UtilEditor.PickFilePath(ref _fileName, "db", style: EditorStyles.colorField);
                     EditorGUILayout.EndHorizontal();
                     EditorGUILayout.Space(4);
                 });
@@ -155,7 +158,7 @@ namespace Snorlax.Database.Editor
 
     public static class ConnectionDatabaseEditorStatic
     {
-        public static ConnectionDatabaseEditor Show(ConnectionString connectionString, Action<string> connectAction)
+        public static ConnectionDatabaseEditor Show(ConnectionString connectionString, Action<ConnectionString> connectAction)
         {
             var window = EditorWindow.GetWindow<ConnectionDatabaseEditor>("Connection Manager", true);
             window.minSize = new Vector2(550, 350);

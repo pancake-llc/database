@@ -88,7 +88,6 @@ namespace Snorlax.Database
 #if UNITY_EDITOR
             string[] pathPart = path.Split(Path.DirectorySeparatorChar);
             string directory = path.Replace(pathPart[pathPart.Length - 1], "");
-            Debug.Log(directory);
             if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
