@@ -1,13 +1,15 @@
 using System;
-using System.Collections;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using LiteDB;
 using Snorlax.Editor;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Snorlax.Database.Editor
 {
@@ -18,13 +20,19 @@ namespace Snorlax.Database.Editor
         private string _status;
         private bool _enableButtonHeader = true;
         private bool _isConnected;
+        private TaskData _task;
 
         [SerializeField] private TreeViewState treeViewState;
         private DbCollectionTreeView _treeView;
 
+        [SerializeField] private TreeViewState _filterTreeViewState;
+        private DatabaseTreeView _databaseTreeView;
+
         public void Initialize()
         {
+            _task = new TaskData();
             treeViewState ??= new TreeViewState();
+            _filterTreeViewState ??= new TreeViewState();
             SceneView.duringSceneGui += DuringSceneGUI;
             EditorApplication.playModeStateChanged += PlayModeStateChanged;
         }
@@ -35,10 +43,11 @@ namespace Snorlax.Database.Editor
 
         private void OnGUI()
         {
-            _treeView ??= new DbCollectionTreeView(treeViewState);
+            _treeView ??= new DbCollectionTreeView(treeViewState) { onSelected = OnSetCurrentTableSelected };
+           // _databaseTreeView ??= new DatabaseTreeView(_filterTreeViewState);
 
             #region header
-            
+
             EditorGUILayout.Space(2);
             EditorGUILayout.BeginHorizontal();
             if (!_enableButtonHeader) GUI.enabled = false;
@@ -76,12 +85,13 @@ namespace Snorlax.Database.Editor
 
             EditorGUILayout.BeginHorizontal();
 
-            #region hierarchy
+            #region treeview
 
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.Width(200), GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(true));
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.Width(150), GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(true));
             EditorGUILayout.LabelField("Tree View",
-                new GUIStyle(EditorStyles.label) {alignment = TextAnchor.UpperCenter, fontSize = 13, richText = true, contentOffset = new Vector2(0, -2)},
-                GUILayout.Height(16));
+                new GUIStyle(EditorStyles.label) { alignment = TextAnchor.UpperCenter, fontSize = 13, richText = true },
+                GUILayout.Height(16),
+                GUILayout.Width(150));
             // todo show db tree
 
             _treeView?.OnGUI(GUILayoutUtility.GetRect(0, 100000, 0, 100000));
@@ -89,12 +99,13 @@ namespace Snorlax.Database.Editor
 
             #endregion
 
+
             #region content
 
             EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
 
             EditorGUILayout.LabelField("Content",
-                new GUIStyle(EditorStyles.label) {alignment = TextAnchor.UpperCenter, fontSize = 13, richText = true, contentOffset = new Vector2(0, -2)},
+                new GUIStyle(EditorStyles.label) { alignment = TextAnchor.UpperCenter, fontSize = 13, richText = true },
                 GUILayout.Height(16));
             // todo display editor db
 
@@ -103,7 +114,7 @@ namespace Snorlax.Database.Editor
             #endregion
 
             EditorGUILayout.EndHorizontal();
-            GUILayout.Label(_status, new GUIStyle(EditorStyles.label) {alignment = TextAnchor.MiddleLeft, fontSize = 12, richText = true}, GUILayout.Height(12));
+            GUILayout.Label(_status, new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleLeft, fontSize = 12, richText = true }, GUILayout.Height(12));
             EditorGUILayout.EndVertical();
 
             #endregion
@@ -167,6 +178,9 @@ namespace Snorlax.Database.Editor
             {
                 EditorUtility.DisplayDialog("Error", e.Message, "Ok");
             }
+
+            _treeView.Items.Clear();
+            _treeView.Reload();
         }
 
         private async Task<LiteDatabase> AsyncConnect(ConnectionString connectionString) { return await Task.Run(() => new LiteDatabase(connectionString)); }
@@ -179,17 +193,81 @@ namespace Snorlax.Database.Editor
         private void LoadTreeView()
         {
             _treeView.Items.Clear();
-            _treeView.Items.Add(new TreeViewItem() {id = 1, depth = 0, displayName = Path.GetFileName(_connectionString.Filename)});
+            _treeView.Items.Add(new TreeViewItem { id = 1, depth = 0, displayName = Path.GetFileName(_connectionString.Filename) });
 
-            var sc = _db.GetCollection("$cols").Query().Where("type = 'system'").OrderBy("name").ToDocuments().ToArray();
+            string[] collections = _db.GetCollectionNames().OrderBy(_ => _).ToArray();
 
-            for (int i = 0; i < sc.Length; i++)
+            for (var i = 0; i < collections.Length; i++)
             {
-                _treeView.Items.Add(new TreeViewItem() {id = i + 2, depth = 1, displayName = sc[i]["name"].AsString});
+                if (!_treeView.Items.Exists(_ => _.id == i + 2)) _treeView.Items.Add(new TreeViewItem { id = i + 2, depth = 1, displayName = collections[i] });
             }
-            
+
             _treeView.Reload();
             _treeView.ExpandAll();
+        }
+
+        private void Execute(TaskData task)
+        {
+            task.Parameters = new BsonDocument();
+            string sql = string.Format(TaskData.SQL_QUERY, task.NameTableSelected);
+            if (_db != null)
+            {
+                using (var reader = _db.Execute(sql, task.Parameters))
+                {
+                    task.ReadResult(reader);
+
+                    LoadResult(task);
+                }
+            }
+        }
+
+        private void LoadResult(TaskData task)
+        {
+            if (task?.Result != null)
+            {
+                foreach (var value in task.Result)
+                {
+                    var doc = value.IsDocument ? value.AsDocument : new BsonDocument { ["[value]"] = value };
+                    if (doc.Keys.Count == 0) doc["[root]"] = "{}";
+
+                    foreach (string key in doc.Keys)
+                    {
+                        Debug.Log(key);
+                    }
+                }
+            }
+        }
+
+        private void LoadFilterParameter(TaskData data)
+        {
+            // _filterTreeView.Items.Clear();
+            // _filterTreeView.Items.Add(new TreeViewItem { id = 1, depth = 0, displayName = data.NameTableSelected });
+            //
+            // if (data?.Result != null)
+            // {
+            //     foreach (var value in data.Result)
+            //     {
+            //         var doc = value.IsDocument ? value.AsDocument : new BsonDocument { ["[value]"] = value };
+            //         if (doc.Keys.Count == 0) doc["[root]"] = "{}";
+            //
+            //         var filters = doc.Keys.ToArray();
+            //         for (int i = 0; i < filters.Length; i++)
+            //         {
+            //             if (!_filterTreeView.Items.Exists(_ => _.id == i + 2)) _filterTreeView.Items.Add(new TreeViewItem { id = i + 2, depth = 1, displayName = filters[i] });
+            //         }
+            //         
+            //         break; // run first row
+            //     }
+            // }
+            //
+            // _filterTreeView.Reload();
+            // _filterTreeView.ExpandAll();
+        }
+
+        private void OnSetCurrentTableSelected(string name)
+        {
+            _task.NameTableSelected = name; 
+            Execute(_task);
         }
 
         #endregion
@@ -199,6 +277,8 @@ namespace Snorlax.Database.Editor
         {
             SceneView.duringSceneGui -= DuringSceneGUI;
             EditorApplication.playModeStateChanged -= PlayModeStateChanged;
+            _db?.Dispose();
+            _db = null;
         }
     }
 

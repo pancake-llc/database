@@ -86,7 +86,7 @@ namespace Snorlax.Database
             string path = TakeDatabaseStreamingAsset($"{name}.db");
             
 #if UNITY_EDITOR
-            string[] pathPart = path.Split(Path.DirectorySeparatorChar);
+            string[] pathPart = path.Split(Path.AltDirectorySeparatorChar);
             string directory = path.Replace(pathPart[pathPart.Length - 1], "");
             if (!Directory.Exists(directory))
             {
