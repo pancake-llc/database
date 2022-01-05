@@ -31,7 +31,7 @@ namespace Snorlax.Database.Editor
         {
             _connectionString = connectionString;
             _onConnectAction = connectAction;
-            _sort = new List<string> {""};
+            _sort = new List<string> { "" };
             _sort.AddRange(Enum.GetNames(typeof(CompareOptions)));
 
             _culture = CultureInfo.GetCultures(CultureTypes.AllCultures)
@@ -54,7 +54,7 @@ namespace Snorlax.Database.Editor
 
             SettingManager.Settings.LastConnectionStrings = _connectionString;
             SettingManager.AddToRecentList(_connectionString);
-            
+
             _onConnectAction?.Invoke(_connectionString);
             Close();
         }
@@ -65,9 +65,9 @@ namespace Snorlax.Database.Editor
                 () =>
                 {
                     EditorGUILayout.BeginHorizontal();
-                    string[] options = {"  Direct           ", "  Shared"};
+                    string[] options = { "  Direct           ", "  Shared" };
                     _cacheSelectedMode = GUILayout.SelectionGrid(_cacheSelectedMode, options, 2, EditorStyles.radioButton);
-                    _connectionType = (ConnectionType) _cacheSelectedMode;
+                    _connectionType = (ConnectionType)_cacheSelectedMode;
 
                     GUILayout.FlexibleSpace();
                     EditorGUILayout.EndHorizontal();
@@ -81,7 +81,7 @@ namespace Snorlax.Database.Editor
                 {
                     EditorGUILayout.BeginHorizontal();
                     _fileName = GUILayout.TextField(_fileName);
-                    UtilEditor.PickFilePath(ref _fileName, "db", style: EditorStyles.colorField);
+                    UtilEditor.PickFilePath(ref _fileName, Application.dataPath, "db", style: EditorStyles.colorField);
                     EditorGUILayout.EndHorizontal();
                     EditorGUILayout.Space(4);
                 });
@@ -106,9 +106,9 @@ namespace Snorlax.Database.Editor
                     EditorGUILayout.BeginHorizontal();
                     GUILayout.Label("Collation:", EditorStyles.label, GUILayout.Width(120));
 
-                    void CultureMenuFunc(object culture) { _cacheCulture = (string) culture; }
+                    void CultureMenuFunc(object culture) { _cacheCulture = (string)culture; }
 
-                    void SortMenuFunc(object sort) { _cacheSort = (string) sort; }
+                    void SortMenuFunc(object sort) { _cacheSort = (string)sort; }
 
                     var cultureMenu = new GenericMenu();
                     foreach (string culture in _culture)

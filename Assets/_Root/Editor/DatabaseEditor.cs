@@ -17,14 +17,14 @@ namespace Snorlax.Database.Editor
         private ConnectionString _connectionString; // connect string for open db
         private string _status;
         private bool _enableButtonHeader = true;
-        private bool _isConnected = false;
+        private bool _isConnected;
 
-        [SerializeField] private TreeViewState _treeViewState;
+        [SerializeField] private TreeViewState treeViewState;
         private DbCollectionTreeView _treeView;
 
         public void Initialize()
         {
-            _treeViewState ??= new TreeViewState();
+            treeViewState ??= new TreeViewState();
             SceneView.duringSceneGui += DuringSceneGUI;
             EditorApplication.playModeStateChanged += PlayModeStateChanged;
         }
@@ -35,7 +35,7 @@ namespace Snorlax.Database.Editor
 
         private void OnGUI()
         {
-            _treeView ??= new DbCollectionTreeView(_treeViewState);
+            _treeView ??= new DbCollectionTreeView(treeViewState);
 
             #region header
             
