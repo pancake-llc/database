@@ -1,15 +1,13 @@
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using LiteDB;
 using Snorlax.Editor;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace Snorlax.Database.Editor
 {
@@ -27,6 +25,7 @@ namespace Snorlax.Database.Editor
 
         [SerializeField] private TreeViewState _filterTreeViewState;
         private DatabaseTreeView _databaseTreeView;
+        private readonly List<string> _headerData = new List<string>();
 
         public void Initialize()
         {
@@ -44,8 +43,7 @@ namespace Snorlax.Database.Editor
         private void OnGUI()
         {
             _treeView ??= new DbCollectionTreeView(treeViewState) { onSelected = OnSetCurrentTableSelected };
-           // _databaseTreeView ??= new DatabaseTreeView(_filterTreeViewState);
-
+            
             #region header
 
             EditorGUILayout.Space(2);
@@ -108,7 +106,7 @@ namespace Snorlax.Database.Editor
                 new GUIStyle(EditorStyles.label) { alignment = TextAnchor.UpperCenter, fontSize = 13, richText = true },
                 GUILayout.Height(16));
             // todo display editor db
-
+            _databaseTreeView?.OnGUI(GUILayoutUtility.GetRect(0, 100000, 0, 100000));
             EditorGUILayout.EndVertical();
 
             #endregion
@@ -232,42 +230,106 @@ namespace Snorlax.Database.Editor
 
                     foreach (string key in doc.Keys)
                     {
-                        Debug.Log(key);
+                        if (!_headerData.Contains(key))
+                        {
+                            _headerData.Add(key);
+                        }
                     }
                 }
+
+                DrawDatabaseTree();
             }
         }
 
         private void LoadFilterParameter(TaskData data)
         {
-            // _filterTreeView.Items.Clear();
-            // _filterTreeView.Items.Add(new TreeViewItem { id = 1, depth = 0, displayName = data.NameTableSelected });
-            //
-            // if (data?.Result != null)
-            // {
-            //     foreach (var value in data.Result)
-            //     {
-            //         var doc = value.IsDocument ? value.AsDocument : new BsonDocument { ["[value]"] = value };
-            //         if (doc.Keys.Count == 0) doc["[root]"] = "{}";
-            //
-            //         var filters = doc.Keys.ToArray();
-            //         for (int i = 0; i < filters.Length; i++)
-            //         {
-            //             if (!_filterTreeView.Items.Exists(_ => _.id == i + 2)) _filterTreeView.Items.Add(new TreeViewItem { id = i + 2, depth = 1, displayName = filters[i] });
-            //         }
-            //         
-            //         break; // run first row
-            //     }
-            // }
-            //
-            // _filterTreeView.Reload();
-            // _filterTreeView.ExpandAll();
+            _databaseTreeView.Items.Clear();
+            _databaseTreeView.Items.Add(new TreeViewItem { id = 1, depth = 0, displayName = data.NameTableSelected });
+
+            if (data?.Result != null)
+            {
+                foreach (var value in data.Result)
+                {
+                    var doc = value.IsDocument ? value.AsDocument : new BsonDocument { ["[value]"] = value };
+                    if (doc.Keys.Count == 0) doc["[root]"] = "{}";
+
+                    var filters = doc.Keys.ToArray();
+                    for (int i = 0; i < filters.Length; i++)
+                    {
+                        if (!_databaseTreeView.Items.Exists(_ => _.id == i + 2))
+                        {
+                            _databaseTreeView.Items.Add(new TreeViewItem { id = i + 2, depth = 1, displayName = filters[i] });
+                        }
+                    }
+
+                    break; // run first row
+                }
+            }
+
+            _databaseTreeView.Reload();
+            _databaseTreeView.ExpandAll();
         }
 
         private void OnSetCurrentTableSelected(string name)
         {
-            _task.NameTableSelected = name; 
+            _task.NameTableSelected = name;
             Execute(_task);
+        }
+
+        private void DrawDatabaseTree()
+        {
+            MultiColumnHeaderState.Column[] columns = new MultiColumnHeaderState.Column[_headerData.Count];
+            for (int i = 0; i < _headerData.Count; i++)
+            {
+                columns[i] = new MultiColumnHeaderState.Column
+                {
+                    allowToggleVisibility = false, headerContent = new GUIContent(_headerData[i]), minWidth = GetHeaderWidthFromType(null)
+                };
+                columns[i].width = columns[i].minWidth;
+                columns[i].canSort = false;
+            }
+
+            MultiColumnHeaderState headerstate = new MultiColumnHeaderState(columns);
+            MultiColumnHeader header = new MultiColumnHeader(headerstate);
+
+            _databaseTreeView ??= new DatabaseTreeView(_filterTreeViewState, header);
+        }
+
+        private float GetHeaderWidthFromType(Type type)
+        {
+            float newSize = 85;
+            // todo
+            return newSize;
+        }
+
+        private bool CanSort(SerializedPropertyType type)
+        {
+            switch (type)
+            {
+                case SerializedPropertyType.AnimationCurve:
+                case SerializedPropertyType.Bounds:
+                case SerializedPropertyType.BoundsInt:
+                case SerializedPropertyType.Character:
+                case SerializedPropertyType.Color:
+                case SerializedPropertyType.ExposedReference:
+                case SerializedPropertyType.FixedBufferSize:
+                case SerializedPropertyType.Generic:
+                case SerializedPropertyType.Gradient:
+                case SerializedPropertyType.ObjectReference:
+                case SerializedPropertyType.Quaternion:
+                case SerializedPropertyType.Rect:
+                case SerializedPropertyType.RectInt:
+                case SerializedPropertyType.Vector2:
+                case SerializedPropertyType.Vector2Int:
+                case SerializedPropertyType.Vector3:
+                case SerializedPropertyType.Vector3Int:
+                case SerializedPropertyType.Vector4:
+                    return false;
+                default:
+                    break;
+            }
+
+            return true;
         }
 
         #endregion
