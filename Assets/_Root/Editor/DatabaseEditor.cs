@@ -15,7 +15,6 @@ namespace Snorlax.Database.Editor
     {
         private LiteDatabase _db; // connect once database at a time
         private ConnectionString _connectionString; // connect string for open db
-        private string _status;
         private bool _enableButtonHeader = true;
         private bool _isConnected;
         private TaskData _task;
@@ -26,6 +25,12 @@ namespace Snorlax.Database.Editor
         [SerializeField] private TreeViewState _filterTreeViewState;
         private DatabaseTreeView _databaseTreeView;
         private readonly List<string> _headerData = new List<string>();
+        private MultiColumnHeaderState _multiColumnHeaderState;
+        private MultiColumnHeader _multiColumnHeader;
+        private MultiColumnHeaderState.Column[] _columns;
+        private Vector2 _tableViewScrollPosition;
+        private float _multiColumnHeaderWidth;
+        private GUIStyle _groupStyle;
 
         public void Initialize()
         {
@@ -42,8 +47,10 @@ namespace Snorlax.Database.Editor
 
         private void OnGUI()
         {
+            _task ??= new TaskData();
             _treeView ??= new DbCollectionTreeView(treeViewState) { onSelected = OnSetCurrentTableSelected };
-            
+            _groupStyle ??= new GUIStyle(GUI.skin.box);
+
             #region header
 
             EditorGUILayout.Space(2);
@@ -79,41 +86,97 @@ namespace Snorlax.Database.Editor
 
             #region body
 
-            EditorGUILayout.BeginVertical();
-
-            EditorGUILayout.BeginHorizontal();
+            //EditorGUILayout.BeginHorizontal();
 
             #region treeview
 
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.Width(150), GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(true));
+            var treeRect = EditorGUILayout.BeginVertical(_groupStyle, GUILayout.Width(150), GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(true));
             EditorGUILayout.LabelField("Tree View",
                 new GUIStyle(EditorStyles.label) { alignment = TextAnchor.UpperCenter, fontSize = 13, richText = true },
                 GUILayout.Height(16),
                 GUILayout.Width(150));
             // todo show db tree
-
-            _treeView?.OnGUI(GUILayoutUtility.GetRect(0, 100000, 0, 100000));
+            _treeView?.OnGUI(GUILayoutUtility.GetRect(0, float.MaxValue, 0, float.MaxValue));
             EditorGUILayout.EndVertical();
 
             #endregion
-
 
             #region content
 
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+            //GUILayout.FlexibleSpace();
+            var windowRect = GUILayoutUtility.GetLastRect();
+            if (_task != null && !string.IsNullOrEmpty(_task.NameTableSelected))
+            {
+                // Here we are basically assigning the size of window to our newly positioned `windowRect`.
+                windowRect.width = position.width;
+                windowRect.height = position.height;
 
-            EditorGUILayout.LabelField("Content",
-                new GUIStyle(EditorStyles.label) { alignment = TextAnchor.UpperCenter, fontSize = 13, richText = true },
-                GUILayout.Height(16));
-            // todo display editor db
-            _databaseTreeView?.OnGUI(GUILayoutUtility.GetRect(0, 100000, 0, 100000));
-            EditorGUILayout.EndVertical();
+                // After compilation and some other events data of the window is lost if it's not saved in some kind of container. Usually those containers are ScriptableObject(s).
+                if (_multiColumnHeader == null) InitializeHeader();
+
+                //! Here we just basically move around group. It's not really padding, we are just setting position and reducing size.
+                var groupRectPaddingInWindow = new Vector2(treeRect.width + 5, 0);
+                var groupRect = new Rect(windowRect);
+
+                groupRect.x += groupRectPaddingInWindow.x;
+                groupRect.width -= groupRectPaddingInWindow.x + 10;
+
+                groupRect.y += groupRectPaddingInWindow.y;
+                groupRect.height -= groupRectPaddingInWindow.y + 32;
+
+                GUI.BeginGroup(groupRect);
+                {
+                    groupRect.x -= groupRectPaddingInWindow.x;
+                    groupRect.y -= groupRectPaddingInWindow.y;
+
+                    var positionalRectAreaOfScrollView = new Rect(groupRect);
+                    positionalRectAreaOfScrollView.x -= 5;
+                    positionalRectAreaOfScrollView.y -= 32;
+
+                    var positionalRectAreaOfScrollView2 = new Rect(groupRect);
+
+                    // Create a `viewRect` since it should be separate from `rect` to avoid circular dependency.
+                    var viewRect = new Rect(groupRect)
+                    {
+                        width = _multiColumnHeaderState.widthOfAllVisibleColumns, // Scroll max on X is basically a sum of width of columns.
+                        //xMax = _columns.Sum((column) => column.width),
+                        //? Do not remove this hegiht. It's compensating for the size of bottom scroll slider when it appears, that is why the right side scroll slider appears.
+                        //height = groupRect.height - columnHeight, // Remove `columnHeight` - basically size of header.
+                    };
+
+                    groupRect.width += groupRectPaddingInWindow.x * 2;
+                    groupRect.height += groupRectPaddingInWindow.y * 2;
+
+                    _tableViewScrollPosition = GUI.BeginScrollView(positionalRectAreaOfScrollView,
+                        _tableViewScrollPosition,
+                        viewRect,
+                        false,
+                        false);
+                    {
+                        // Scroll View Scope.
+
+                        //? After debugging for a few hours - this is the only hack I have found to actually work to aleviate that scaling bug.
+                        _multiColumnHeaderWidth = Mathf.Max(positionalRectAreaOfScrollView2.width + _tableViewScrollPosition.x, _multiColumnHeaderWidth);
+
+                        // This is a rect for our multi column table.
+                        var columnRectPrototype = new Rect(positionalRectAreaOfScrollView2)
+                        {
+                            width = _multiColumnHeaderWidth, height = EditorGUIUtility.singleLineHeight, // This is basically a height of each column including header.
+                        };
+
+                        // Draw header for columns here.
+                        _multiColumnHeader.OnGUI(columnRectPrototype, 0.0f);
+                    }
+                    GUI.EndScrollView(true);
+                }
+                GUI.EndGroup();
+            }
+
+            //EditorGUILayout.EndVertical();
 
             #endregion
 
-            EditorGUILayout.EndHorizontal();
-            GUILayout.Label(_status, new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleLeft, fontSize = 12, richText = true }, GUILayout.Height(12));
-            EditorGUILayout.EndVertical();
+            //EditorGUILayout.EndHorizontal();
 
             #endregion
         }
@@ -128,14 +191,10 @@ namespace Snorlax.Database.Editor
         private async void Connect(ConnectionString connectString)
         {
             _enableButtonHeader = false;
-            _status = $"Openning {connectString.Filename} ...";
-            await Task.Delay(100);
             try
             {
                 _db = await AsyncConnect(connectString);
                 int userVersion = _db.UserVersion;
-                await Task.Delay(100);
-                _status = "Done";
             }
             catch (Exception e)
             {
@@ -153,24 +212,17 @@ namespace Snorlax.Database.Editor
             _enableButtonHeader = true;
             _connectionString = connectString;
             _isConnected = true;
-            await Task.Delay(100);
-            _status = "";
             LoadTreeView();
         }
 
         private async void Disconnect()
         {
-            _status = "Closing...";
-            await Task.Delay(100);
             _isConnected = false;
 
             try
             {
                 _db?.Dispose();
                 _db = null;
-                _status = "Done";
-                await Task.Delay(100);
-                _status = "";
             }
             catch (Exception e)
             {
@@ -237,37 +289,8 @@ namespace Snorlax.Database.Editor
                     }
                 }
 
-                DrawDatabaseTree();
+                InitializeHeader();
             }
-        }
-
-        private void LoadFilterParameter(TaskData data)
-        {
-            _databaseTreeView.Items.Clear();
-            _databaseTreeView.Items.Add(new TreeViewItem { id = 1, depth = 0, displayName = data.NameTableSelected });
-
-            if (data?.Result != null)
-            {
-                foreach (var value in data.Result)
-                {
-                    var doc = value.IsDocument ? value.AsDocument : new BsonDocument { ["[value]"] = value };
-                    if (doc.Keys.Count == 0) doc["[root]"] = "{}";
-
-                    var filters = doc.Keys.ToArray();
-                    for (int i = 0; i < filters.Length; i++)
-                    {
-                        if (!_databaseTreeView.Items.Exists(_ => _.id == i + 2))
-                        {
-                            _databaseTreeView.Items.Add(new TreeViewItem { id = i + 2, depth = 1, displayName = filters[i] });
-                        }
-                    }
-
-                    break; // run first row
-                }
-            }
-
-            _databaseTreeView.Reload();
-            _databaseTreeView.ExpandAll();
         }
 
         private void OnSetCurrentTableSelected(string name)
@@ -276,28 +299,42 @@ namespace Snorlax.Database.Editor
             Execute(_task);
         }
 
-        private void DrawDatabaseTree()
+        private void InitializeHeader()
         {
-            MultiColumnHeaderState.Column[] columns = new MultiColumnHeaderState.Column[_headerData.Count];
-            for (int i = 0; i < _headerData.Count; i++)
+            _multiColumnHeaderWidth = position.width;
+            _columns = new MultiColumnHeaderState.Column[_headerData.Count];
+            for (var i = 0; i < _headerData.Count; i++)
             {
-                columns[i] = new MultiColumnHeaderState.Column
+                _columns[i] = new MultiColumnHeaderState.Column
                 {
-                    allowToggleVisibility = false, headerContent = new GUIContent(_headerData[i]), minWidth = GetHeaderWidthFromType(null)
+                    allowToggleVisibility = false,
+                    headerContent = new GUIContent(_headerData[i]),
+                    minWidth = GetMinHeaderWidth(null),
+                    maxWidth = GetMaxHeaderWidth(null),
+                    autoResize = true,
+                    canSort = false
                 };
-                columns[i].width = columns[i].minWidth;
-                columns[i].canSort = false;
+                _columns[i].width = _columns[i].minWidth;
             }
 
-            MultiColumnHeaderState headerstate = new MultiColumnHeaderState(columns);
-            MultiColumnHeader header = new MultiColumnHeader(headerstate);
+            _multiColumnHeaderState = new MultiColumnHeaderState(_columns);
+            _multiColumnHeader = new MultiColumnHeader(_multiColumnHeaderState);
+            _multiColumnHeader.visibleColumnsChanged += header => header.ResizeToFit();
+            _multiColumnHeader.ResizeToFit();
 
-            _databaseTreeView ??= new DatabaseTreeView(_filterTreeViewState, header);
+            _databaseTreeView = new DatabaseTreeView(_filterTreeViewState, _multiColumnHeader);
         }
 
-        private float GetHeaderWidthFromType(Type type)
+        private float GetMinHeaderWidth(Type type)
         {
             float newSize = 85;
+            // todo
+            return newSize;
+        }
+
+        private float GetMaxHeaderWidth(Type type)
+        {
+            float newSize = 150;
             // todo
             return newSize;
         }
