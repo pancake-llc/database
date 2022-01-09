@@ -31,6 +31,7 @@ namespace Snorlax.Database.Editor
         private Vector2 _tableViewScrollPosition;
         private float _multiColumnHeaderWidth;
         private GUIStyle _groupStyle;
+        private List<TableRowData> _rowDatas = new List<TableRowData>();
 
         public void Initialize()
         {
@@ -86,8 +87,6 @@ namespace Snorlax.Database.Editor
 
             #region body
 
-            //EditorGUILayout.BeginHorizontal();
-
             #region treeview
 
             var treeRect = EditorGUILayout.BeginVertical(_groupStyle, GUILayout.Width(150), GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(true));
@@ -103,7 +102,6 @@ namespace Snorlax.Database.Editor
 
             #region content
 
-            //GUILayout.FlexibleSpace();
             var windowRect = GUILayoutUtility.GetLastRect();
             if (_task != null && !string.IsNullOrEmpty(_task.NameTableSelected))
             {
@@ -166,17 +164,23 @@ namespace Snorlax.Database.Editor
 
                         // Draw header for columns here.
                         _multiColumnHeader.OnGUI(columnRectPrototype, 0.0f);
+
+                        float heightJump = EditorGUIUtility.singleLineHeight;
+
+                        for (int i = 0; i < _rowDatas.Count; i++)
+                        {
+                            var serializedObject = new SerializedObject(_rowDatas[i]);
+
+                            var calculatedRowHeight = 0f;
+                            var rowRect = new Rect(columnRectPrototype);
+                        }
                     }
                     GUI.EndScrollView(true);
                 }
                 GUI.EndGroup();
             }
 
-            //EditorGUILayout.EndVertical();
-
             #endregion
-
-            //EditorGUILayout.EndHorizontal();
 
             #endregion
         }
@@ -215,7 +219,7 @@ namespace Snorlax.Database.Editor
             LoadTreeView();
         }
 
-        private async void Disconnect()
+        private void Disconnect()
         {
             _isConnected = false;
 
@@ -275,6 +279,7 @@ namespace Snorlax.Database.Editor
         {
             if (task?.Result != null)
             {
+                _rowDatas.Clear();
                 foreach (var value in task.Result)
                 {
                     var doc = value.IsDocument ? value.AsDocument : new BsonDocument { ["[value]"] = value };
@@ -287,6 +292,10 @@ namespace Snorlax.Database.Editor
                             _headerData.Add(key);
                         }
                     }
+
+                    var record = CreateInstance<TableRowData>();
+                    InitializeRecordData(doc, ref record);
+                    _rowDatas.Add(record);
                 }
 
                 InitializeHeader();
@@ -325,6 +334,16 @@ namespace Snorlax.Database.Editor
             _databaseTreeView = new DatabaseTreeView(_filterTreeViewState, _multiColumnHeader);
         }
 
+        private void InitializeRecordData(BsonDocument document, ref TableRowData reader)
+        {
+            reader.dictData.Clear();
+            var filters = document.RawValue;
+            foreach (var value in filters)
+            {
+                reader.dictData.Add(value.Key, value.Value.ToString());
+            }
+        }
+
         private float GetMinHeaderWidth(Type type)
         {
             float newSize = 85;
@@ -334,7 +353,7 @@ namespace Snorlax.Database.Editor
 
         private float GetMaxHeaderWidth(Type type)
         {
-            float newSize = 150;
+            float newSize = 200;
             // todo
             return newSize;
         }
