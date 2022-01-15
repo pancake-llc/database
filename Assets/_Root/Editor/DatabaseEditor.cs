@@ -403,7 +403,7 @@ namespace Snorlax.Database.Editor
     public static class DatabaseEditorStatic
     {
         [MenuItem("Tools/Snorlax/Show Database &_d")]
-        private static void Show()
+        public static DatabaseEditor Show()
         {
             var window = EditorWindow.GetWindow<DatabaseEditor>("Database", true, UtilEditor.GetInspectorWindowType());
             if (window != null)
@@ -411,6 +411,8 @@ namespace Snorlax.Database.Editor
                 window.Initialize();
                 window.Show(true);
             }
+
+            return window;
         }
     }
 }
