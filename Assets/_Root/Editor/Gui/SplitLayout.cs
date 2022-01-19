@@ -16,7 +16,6 @@ namespace Snorlax.Database.Editor
         public Func<float> heightGetter;
 
         private GUIStyle _leftViewStyle;
-        private GUIStyle _rightViewStyle;
         private readonly AreaResizer _resizer;
         private float _leftWidth = 300;
         private float _startWidth;
@@ -38,7 +37,33 @@ namespace Snorlax.Database.Editor
             float height = heightGetter?.Invoke() ?? (window ? window : DatabaseEditorStatic.Show()).position.height - GUILayoutUtility.GetLastRect().yMax - 40;
             UtilEditor.Horizontal(() =>
             {
-                
+                _leftViewStyle = new GUIStyle(R.SplitterPanelLeft) { fixedWidth = GetLeftWidth() };
+                if (leftView != null)
+                {
+                    UtilEditor.Vertical(_leftViewStyle, () => { leftView.GUI(); }, GUILayout.MinHeight(height));
+                }
+
+                _resizer.Process(4,
+                    height,
+                    _ => _startWidth = GetLeftWidth(),
+                    detal =>
+                    {
+                        float currentWidth = _startWidth + detal;
+                        if (currentWidth < MIN_WIDTH) return;
+                        SetLeftWidth(currentWidth);
+                        _leftViewStyle.fixedWidth = GetLeftWidth();
+                        GUIUtility.ExitGUI();
+                    });
+
+                if (rightView != null)
+                {
+                    UtilEditor.Vertical(R.SplitterPanelRight,
+                        () =>
+                        {
+                            rightView.GUI();
+                            GUILayout.MinHeight(height);
+                        });
+                }
             });
         }
 
