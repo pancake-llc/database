@@ -162,6 +162,7 @@ namespace Snorlax.Database.Editor
         {
             var window = EditorWindow.GetWindow<ConnectionDatabaseEditor>("Connection Manager", true);
             window.minSize = new Vector2(550, 350);
+            window.maxSize = new Vector2(550, 350);
             if (window == null) return window;
             window.Initialize(connectionString, connectAction);
             window.Show(true);

@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using LiteDB;
-using Snorlax.Editor;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
@@ -22,7 +21,7 @@ namespace Snorlax.Database.Editor
         [SerializeField] private TreeViewState treeViewState;
         private DbCollectionTreeView _treeView;
 
-        [SerializeField] private TreeViewState _filterTreeViewState;
+        [SerializeField] private TreeViewState filterTreeViewState;
         private DatabaseTreeView _databaseTreeView;
         private readonly List<string> _headerData = new List<string>();
         private MultiColumnHeaderState _multiColumnHeaderState;
@@ -33,11 +32,17 @@ namespace Snorlax.Database.Editor
         private GUIStyle _groupStyle;
         private List<TableRowData> _rowDatas = new List<TableRowData>();
 
+        private Rect _positionEntryPoint;
+        private const float REMOVE_BTN_WIDTH = 30f;
+        private const float DRAG_EDIT_WIDTH = 5f;
+
+        private float SingleRowHeight => EditorGUIUtility.singleLineHeight;
+
         public void Initialize()
         {
             _task = new TaskData();
             treeViewState ??= new TreeViewState();
-            _filterTreeViewState ??= new TreeViewState();
+            filterTreeViewState ??= new TreeViewState();
             SceneView.duringSceneGui += DuringSceneGUI;
             EditorApplication.playModeStateChanged += PlayModeStateChanged;
         }
@@ -49,7 +54,7 @@ namespace Snorlax.Database.Editor
         private void OnGUI()
         {
             _task ??= new TaskData();
-            _treeView ??= new DbCollectionTreeView(treeViewState) { onSelected = OnSetCurrentTableSelected };
+            _treeView ??= new DbCollectionTreeView(treeViewState) {onSelected = OnSetCurrentTableSelected};
             _groupStyle ??= new GUIStyle(GUI.skin.box);
 
             #region header
@@ -91,7 +96,7 @@ namespace Snorlax.Database.Editor
 
             var treeRect = EditorGUILayout.BeginVertical(_groupStyle, GUILayout.Width(150), GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(true));
             EditorGUILayout.LabelField("Tree View",
-                new GUIStyle(EditorStyles.label) { alignment = TextAnchor.UpperCenter, fontSize = 13, richText = true },
+                new GUIStyle(EditorStyles.label) {alignment = TextAnchor.UpperCenter, fontSize = 13, richText = true},
                 GUILayout.Height(16),
                 GUILayout.Width(150));
             // todo show db tree
@@ -159,21 +164,13 @@ namespace Snorlax.Database.Editor
                         // This is a rect for our multi column table.
                         var columnRectPrototype = new Rect(positionalRectAreaOfScrollView2)
                         {
-                            width = _multiColumnHeaderWidth, height = EditorGUIUtility.singleLineHeight, // This is basically a height of each column including header.
+                            width = _multiColumnHeaderWidth, height = SingleRowHeight // This is basically a height of each column including header.
                         };
 
                         // Draw header for columns here.
                         _multiColumnHeader.OnGUI(columnRectPrototype, 0.0f);
 
-                        float heightJump = EditorGUIUtility.singleLineHeight;
-
-                        for (int i = 0; i < _rowDatas.Count; i++)
-                        {
-                            var serializedObject = new SerializedObject(_rowDatas[i]);
-
-                            var calculatedRowHeight = 0f;
-                            var rowRect = new Rect(columnRectPrototype);
-                        }
+                        DrawTableContent(columnRectPrototype);
                     }
                     GUI.EndScrollView(true);
                 }
@@ -247,13 +244,13 @@ namespace Snorlax.Database.Editor
         private void LoadTreeView()
         {
             _treeView.Items.Clear();
-            _treeView.Items.Add(new TreeViewItem { id = 1, depth = 0, displayName = Path.GetFileName(_connectionString.Filename) });
+            _treeView.Items.Add(new TreeViewItem {id = 1, depth = 0, displayName = Path.GetFileName(_connectionString.Filename)});
 
             string[] collections = _db.GetCollectionNames().OrderBy(_ => _).ToArray();
 
             for (var i = 0; i < collections.Length; i++)
             {
-                if (!_treeView.Items.Exists(_ => _.id == i + 2)) _treeView.Items.Add(new TreeViewItem { id = i + 2, depth = 1, displayName = collections[i] });
+                if (!_treeView.Items.Exists(_ => _.id == i + 2)) _treeView.Items.Add(new TreeViewItem {id = i + 2, depth = 1, displayName = collections[i]});
             }
 
             _treeView.Reload();
@@ -282,7 +279,7 @@ namespace Snorlax.Database.Editor
                 _rowDatas.Clear();
                 foreach (var value in task.Result)
                 {
-                    var doc = value.IsDocument ? value.AsDocument : new BsonDocument { ["[value]"] = value };
+                    var doc = value.IsDocument ? value.AsDocument : new BsonDocument {["[value]"] = value};
                     if (doc.Keys.Count == 0) doc["[root]"] = "{}";
 
                     foreach (string key in doc.Keys)
@@ -305,6 +302,10 @@ namespace Snorlax.Database.Editor
         private void OnSetCurrentTableSelected(string name)
         {
             _task.NameTableSelected = name;
+            _columns = null;
+            _multiColumnHeader = null;
+            _multiColumnHeaderState = null;
+            _headerData.Clear();
             Execute(_task);
         }
 
@@ -331,7 +332,7 @@ namespace Snorlax.Database.Editor
             _multiColumnHeader.visibleColumnsChanged += header => header.ResizeToFit();
             _multiColumnHeader.ResizeToFit();
 
-            _databaseTreeView = new DatabaseTreeView(_filterTreeViewState, _multiColumnHeader);
+            _databaseTreeView = new DatabaseTreeView(filterTreeViewState, _multiColumnHeader);
         }
 
         private void InitializeRecordData(BsonDocument document, ref TableRowData reader)
@@ -353,7 +354,7 @@ namespace Snorlax.Database.Editor
 
         private float GetMaxHeaderWidth(Type type)
         {
-            float newSize = 200;
+            float newSize = 250;
             // todo
             return newSize;
         }
@@ -388,6 +389,78 @@ namespace Snorlax.Database.Editor
             return true;
         }
 
+        private void DrawTableContent(Rect columnRectPrototype)
+        {
+            float heightJump = SingleRowHeight;
+            for (int i = 0; i < _rowDatas.Count; i++)
+            {
+                var serializedObject = new SerializedObject(_rowDatas[i]);
+
+                var calculatedRowHeight = 0f;
+                var rowRect = new Rect(columnRectPrototype);
+
+                for (int j = 0; j < _columns.Length; j++)
+                {
+                    int visibleColumnIndex = _multiColumnHeader.GetVisibleColumnIndex(j);
+                    var columnRect = _multiColumnHeader.GetColumnRect(visibleColumnIndex);
+                    columnRect.y = rowRect.y + heightJump;
+
+                    GUIStyle nameFieldGUIStyle = new GUIStyle(GUI.skin.label) {padding = new RectOffset(left: 10, right: 10, top: 2, bottom: 2)};
+                }
+            }
+        }
+
+        private Type TryConvertDataToType(string data)
+        {
+            // set culture to invariant
+            StringConverter.Default.Culture = System.Globalization.CultureInfo.InvariantCulture;
+            // add custom converter to default, it will match strings starting with CUSTOM: and return MyCustomClass
+            //StringConverter.Default.Clear();
+            // StringConverter.Default.AddConverter((string value, out bool result) =>
+            // {
+            //     var flag = bool.TryParse(value, out result);
+            //
+            //     if (flag) 
+            //     {
+            //         var typeResult = typeof(bool);
+            //         Debug.Log("type boolean");
+            //     }
+            //     else
+            //     {
+            //         Debug.Log("parse value:" + value);
+            //     }
+            //     return flag;
+            // });
+            
+            var items = new[] {"200", "2504", "4343434343", "-0.500000030", "3.33", "true", "false", "2014-10-10 22:00:00", "CUSTOM: something"};
+            
+            foreach (var item in items)
+            {
+                object result;
+                Type type;
+                if (StringConverter.Default.TryConvert(item, out result, out type))
+                {
+                    Debug.Log("value :" + result + "   type:" + type);
+                }
+            }
+
+            // create new non-default converter
+            var localConverter = new StringConverter();
+            // // add custom converter to parse json which matches schema for MySecondCustomClass
+            // localConverter.AddConverter((string value, out MySecondCustomClass result) => TryParseJson(value, @"{'value': {'type': 'string'}}", out result));
+            // {
+            //     object result;
+            //     // check if that works
+            //     if (localConverter.TryConvert("{value: \"Some value\"}", out result))
+            //     {
+            //         Console.WriteLine(((MySecondCustomClass) result).Value);
+            //     }
+            // }
+            //Console.ReadKey();
+
+            return default;
+        }
+
         #endregion
 
 
@@ -405,7 +478,9 @@ namespace Snorlax.Database.Editor
         [MenuItem("Tools/Snorlax/Show Database &_d")]
         public static DatabaseEditor Show()
         {
-            var window = EditorWindow.GetWindow<DatabaseEditor>("Database", true, UtilEditor.GetInspectorWindowType());
+            var window = EditorWindow.GetWindow<DatabaseEditor>("Database", true);
+            window.maxSize = new Vector2(1200, 800);
+            window.minSize = new Vector2(600, 400);
             if (window != null)
             {
                 window.Initialize();
