@@ -433,7 +433,7 @@ namespace Snorlax.Database.Editor
             result = new List<bool>();
             for (var i = 0; i < arrs.Length; i++)
             {
-                bool flag = bool.TryParse(value, out bool b);
+                bool flag = bool.TryParse(arrs[i], out bool b);
                 if (!flag)
                 {
                     result.Clear();
@@ -451,11 +451,15 @@ namespace Snorlax.Database.Editor
 
     public class ListInt32Converter : TypeConverter<List<int>>
     {
-        private readonly CultureInfo _culture;
+        private readonly Int32Converter _int32Converter;
 
-        public ListInt32Converter(CultureInfo culture) { _culture = culture; }
+        public ListInt32Converter(CultureInfo culture) { _int32Converter = new Int32Converter(culture); }
 
-        public ListInt32Converter() { _culture = CultureInfo.CurrentCulture; }
+        public ListInt32Converter()
+        {
+            var culture = CultureInfo.CurrentCulture;
+            _int32Converter = new Int32Converter(culture);
+        }
 
         public override bool TryParse(string value, out List<int> result, out Type type)
         {
@@ -467,7 +471,7 @@ namespace Snorlax.Database.Editor
             result = new List<int>();
             for (var i = 0; i < arrs.Length; i++)
             {
-                bool flag = int.TryParse(value, NumberStyles.Integer, _culture, out int b);
+                bool flag = _int32Converter.TryParse(arrs[i], out int b, out _);
                 if (!flag)
                 {
                     result.Clear();
@@ -485,11 +489,15 @@ namespace Snorlax.Database.Editor
 
     public class ListInt64Converter : TypeConverter<List<long>>
     {
-        private readonly CultureInfo _culture;
+        private readonly Int64Converter _int64Converter;
 
-        public ListInt64Converter(CultureInfo culture) { _culture = culture; }
+        public ListInt64Converter(CultureInfo culture) { _int64Converter = new Int64Converter(culture); }
 
-        public ListInt64Converter() { _culture = CultureInfo.CurrentCulture; }
+        public ListInt64Converter()
+        {
+            var culture = CultureInfo.CurrentCulture;
+            _int64Converter = new Int64Converter(culture);
+        }
 
         public override bool TryParse(string value, out List<long> result, out Type type)
         {
@@ -501,7 +509,7 @@ namespace Snorlax.Database.Editor
             result = new List<long>();
             for (var i = 0; i < arrs.Length; i++)
             {
-                bool flag = long.TryParse(value, NumberStyles.Integer, _culture, out long b);
+                bool flag = _int64Converter.TryParse(arrs[i], out long b, out _);
                 if (!flag)
                 {
                     result.Clear();
@@ -519,11 +527,15 @@ namespace Snorlax.Database.Editor
 
     public class ListFloatConverter : TypeConverter<List<float>>
     {
-        private readonly CultureInfo _culture;
+        private readonly FloatConverter _floatConverter;
 
-        public ListFloatConverter(CultureInfo culture) { _culture = culture; }
+        public ListFloatConverter(CultureInfo culture) { _floatConverter = new FloatConverter(culture); }
 
-        public ListFloatConverter() { _culture = CultureInfo.CurrentCulture; }
+        public ListFloatConverter()
+        {
+            var culture = CultureInfo.CurrentCulture;
+            _floatConverter = new FloatConverter(culture);
+        }
 
         public override bool TryParse(string value, out List<float> result, out Type type)
         {
@@ -535,7 +547,7 @@ namespace Snorlax.Database.Editor
             result = new List<float>();
             for (var i = 0; i < arrs.Length; i++)
             {
-                bool flag = float.TryParse(value, NumberStyles.Number, _culture, out float b);
+                bool flag = _floatConverter.TryParse(arrs[i], out float b, out _);
                 if (!flag)
                 {
                     result.Clear();
@@ -553,11 +565,15 @@ namespace Snorlax.Database.Editor
 
     public class ListDoubleConverter : TypeConverter<List<double>>
     {
-        private readonly CultureInfo _culture;
+        private readonly DoubleConverter _doubleConverter;
 
-        public ListDoubleConverter(CultureInfo culture) { _culture = culture; }
+        public ListDoubleConverter(CultureInfo culture) { _doubleConverter = new DoubleConverter(culture); }
 
-        public ListDoubleConverter() { _culture = CultureInfo.CurrentCulture; }
+        public ListDoubleConverter()
+        {
+            var culture = CultureInfo.CurrentCulture;
+            _doubleConverter = new DoubleConverter(culture);
+        }
 
         public override bool TryParse(string value, out List<double> result, out Type type)
         {
@@ -569,7 +585,7 @@ namespace Snorlax.Database.Editor
             result = new List<double>();
             for (var i = 0; i < arrs.Length; i++)
             {
-                bool flag = double.TryParse(value, NumberStyles.Number, _culture, out double b);
+                bool flag = _doubleConverter.TryParse(arrs[i], out double b, out _);
                 if (!flag)
                 {
                     result.Clear();
@@ -623,7 +639,7 @@ namespace Snorlax.Database.Editor
             result = new List<DateTime>();
             for (var i = 0; i < arrs.Length; i++)
             {
-                bool flag = _dateTimeConverter.TryParse(value, out var date, out _);
+                bool flag = _dateTimeConverter.TryParse(arrs[i], out var date, out _);
                 if (!flag)
                 {
                     result.Clear();
@@ -661,7 +677,7 @@ namespace Snorlax.Database.Editor
             result = new List<decimal>();
             for (var i = 0; i < arrs.Length; i++)
             {
-                bool flag = _decimalConverter.TryParse(value, out decimal item, out _);
+                bool flag = _decimalConverter.TryParse(arrs[i], out decimal item, out _);
                 if (!flag)
                 {
                     result.Clear();
