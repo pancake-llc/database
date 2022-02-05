@@ -25,6 +25,7 @@ namespace Snorlax.Database.Editor
         public CultureInfo Culture { get; set; } = CultureInfo.CurrentCulture;
 
         private UntypedConvertDelegate _stringConverterRef;
+        private UntypedConvertDelegate _listStringConverterRef;
 
         private static StringConverter CreateDefault()
         {
@@ -45,10 +46,6 @@ namespace Snorlax.Database.Editor
             converter.AddConverter(new Vector3IntConverter(converter.Culture));
             converter.AddConverter(new Vector4Converter(converter.Culture));
 
-            //vector2
-            //vector3
-            //quaterinon
-
             // string path :
             // AudioClip,
             // AnimationClip,
@@ -58,13 +55,13 @@ namespace Snorlax.Database.Editor
             // Prefab,
             // ScriptableObject,
 
-            // BsonArray : [1,2] or ["A","B","C"] or [1.5,3,2]
-            // List<bool>
-            // List<int>  // like vector2, vector3, vector4, quaternion
-            // List<long>
-            // List<float>
-            // List<double>
-            // List<string>
+            converter.AddConverter(new ListBoolConverter());
+            converter.AddConverter(new ListInt32Converter(converter.Culture));
+            converter.AddConverter(new ListInt64Converter(converter.Culture));
+            converter.AddConverter(new ListFloatConverter(converter.Culture));
+            converter.AddConverter(new ListDoubleConverter(converter.Culture));
+            converter.AddConverter(new ListDecimalConverter(converter.Culture));
+            converter.AddConverter(new ListDateTimeConverter(converter.Culture));
 
             return converter;
         }
@@ -187,16 +184,27 @@ namespace Snorlax.Database.Editor
         // remove string converter in last index to ensure stringConverter is the last converter in the array 
         private void RemoveStringConverter()
         {
-            if (_stringConverterRef == null) return;
+            if (_stringConverterRef != null)
+            {
+                _converters.Remove(_stringConverterRef);
+                _stringConverterRef = null;
+            }
 
-            _converters.Remove(_stringConverterRef);
-            _stringConverterRef = null;
+            if (_listStringConverterRef != null)
+            {
+                _converters.Remove(_listStringConverterRef);
+                _listStringConverterRef = null;
+            }
         }
 
         // add string converter in last index
         private void AddStringConverter()
         {
-            if (_stringConverterRef != null) RemoveStringConverter();
+            if (_stringConverterRef != null || _listStringConverterRef != null) RemoveStringConverter();
+
+            // add ListStringConverter before StringConverter
+            _listStringConverterRef = FromTryPattern(new ListStringConverter());
+            _converters.Add(_listStringConverterRef);
 
             _stringConverterRef = FromTryPattern(new StringConverterInternal());
             _converters.Add(_stringConverterRef);

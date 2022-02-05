@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using LiteDB;
 using Snorlax.Common;
@@ -374,7 +375,7 @@ namespace Snorlax.Database.Editor
             return flag;
         }
     }
-    
+
     // {"$v4":"1.0:1.0:1.0:1.0"}
     public class Vector4Converter : TypeConverter<Vector4>
     {
@@ -417,7 +418,264 @@ namespace Snorlax.Database.Editor
 
     #endregion
 
-    #region collection
+    #region collection BsonArray : [1,2] or ["A","B","C"] or [1.5,3,2]
+
+    public class ListBoolConverter : TypeConverter<List<bool>>
+    {
+        // [true,false]
+        public override bool TryParse(string value, out List<bool> result, out Type type)
+        {
+            string temp = value;
+            temp = temp.Remove(0, 1);
+            temp = temp.Remove(temp.Length - 1, 1);
+            string[] arrs = temp.Split(',');
+
+            result = new List<bool>();
+            for (var i = 0; i < arrs.Length; i++)
+            {
+                bool flag = bool.TryParse(value, out bool b);
+                if (!flag)
+                {
+                    result.Clear();
+                    type = null;
+                    return false;
+                }
+
+                result.Add(b);
+            }
+
+            type = typeof(List<bool>);
+            return true;
+        }
+    }
+
+    public class ListInt32Converter : TypeConverter<List<int>>
+    {
+        private readonly CultureInfo _culture;
+
+        public ListInt32Converter(CultureInfo culture) { _culture = culture; }
+
+        public ListInt32Converter() { _culture = CultureInfo.CurrentCulture; }
+
+        public override bool TryParse(string value, out List<int> result, out Type type)
+        {
+            string temp = value;
+            temp = temp.Remove(0, 1);
+            temp = temp.Remove(temp.Length - 1, 1);
+            string[] arrs = temp.Split(',');
+
+            result = new List<int>();
+            for (var i = 0; i < arrs.Length; i++)
+            {
+                bool flag = int.TryParse(value, NumberStyles.Integer, _culture, out int b);
+                if (!flag)
+                {
+                    result.Clear();
+                    type = null;
+                    return false;
+                }
+
+                result.Add(b);
+            }
+
+            type = typeof(List<int>);
+            return true;
+        }
+    }
+
+    public class ListInt64Converter : TypeConverter<List<long>>
+    {
+        private readonly CultureInfo _culture;
+
+        public ListInt64Converter(CultureInfo culture) { _culture = culture; }
+
+        public ListInt64Converter() { _culture = CultureInfo.CurrentCulture; }
+
+        public override bool TryParse(string value, out List<long> result, out Type type)
+        {
+            string temp = value;
+            temp = temp.Remove(0, 1);
+            temp = temp.Remove(temp.Length - 1, 1);
+            string[] arrs = temp.Split(',');
+
+            result = new List<long>();
+            for (var i = 0; i < arrs.Length; i++)
+            {
+                bool flag = long.TryParse(value, NumberStyles.Integer, _culture, out long b);
+                if (!flag)
+                {
+                    result.Clear();
+                    type = null;
+                    return false;
+                }
+
+                result.Add(b);
+            }
+
+            type = typeof(List<long>);
+            return true;
+        }
+    }
+
+    public class ListFloatConverter : TypeConverter<List<float>>
+    {
+        private readonly CultureInfo _culture;
+
+        public ListFloatConverter(CultureInfo culture) { _culture = culture; }
+
+        public ListFloatConverter() { _culture = CultureInfo.CurrentCulture; }
+
+        public override bool TryParse(string value, out List<float> result, out Type type)
+        {
+            string temp = value;
+            temp = temp.Remove(0, 1);
+            temp = temp.Remove(temp.Length - 1, 1);
+            string[] arrs = temp.Split(',');
+
+            result = new List<float>();
+            for (var i = 0; i < arrs.Length; i++)
+            {
+                bool flag = float.TryParse(value, NumberStyles.Number, _culture, out float b);
+                if (!flag)
+                {
+                    result.Clear();
+                    type = null;
+                    return false;
+                }
+
+                result.Add(b);
+            }
+
+            type = typeof(List<float>);
+            return true;
+        }
+    }
+
+    public class ListDoubleConverter : TypeConverter<List<double>>
+    {
+        private readonly CultureInfo _culture;
+
+        public ListDoubleConverter(CultureInfo culture) { _culture = culture; }
+
+        public ListDoubleConverter() { _culture = CultureInfo.CurrentCulture; }
+
+        public override bool TryParse(string value, out List<double> result, out Type type)
+        {
+            string temp = value;
+            temp = temp.Remove(0, 1);
+            temp = temp.Remove(temp.Length - 1, 1);
+            string[] arrs = temp.Split(',');
+
+            result = new List<double>();
+            for (var i = 0; i < arrs.Length; i++)
+            {
+                bool flag = double.TryParse(value, NumberStyles.Number, _culture, out double b);
+                if (!flag)
+                {
+                    result.Clear();
+                    type = null;
+                    return false;
+                }
+
+                result.Add(b);
+            }
+
+            type = typeof(List<double>);
+            return true;
+        }
+    }
+
+    public class ListStringConverter : TypeConverter<List<string>>
+    {
+        public override bool TryParse(string value, out List<string> result, out Type type)
+        {
+            string temp = value;
+            temp = temp.Remove(0, 1);
+            temp = temp.Remove(temp.Length - 1, 1);
+            string[] arrs = temp.Split(',');
+
+            result = new List<string>(arrs);
+            type = typeof(List<string>);
+            return true;
+        }
+    }
+
+    // [{"$date":"2022-02-05T11:28:51.1800000Z"},{"$date":"1996-04-25T00:30:00.0000000Z"}]
+    public class ListDateTimeConverter : TypeConverter<List<DateTime>>
+    {
+        private readonly DateTimeConverter _dateTimeConverter;
+
+        public ListDateTimeConverter(CultureInfo culture) { _dateTimeConverter = new DateTimeConverter(culture); }
+
+        public ListDateTimeConverter()
+        {
+            var culture = CultureInfo.CurrentCulture;
+            _dateTimeConverter = new DateTimeConverter(culture);
+        }
+
+        public override bool TryParse(string value, out List<DateTime> result, out Type type)
+        {
+            string temp = value;
+            temp = temp.Remove(0, 1);
+            temp = temp.Remove(temp.Length - 1, 1);
+            string[] arrs = temp.Split(',');
+
+            result = new List<DateTime>();
+            for (var i = 0; i < arrs.Length; i++)
+            {
+                bool flag = _dateTimeConverter.TryParse(value, out var date, out _);
+                if (!flag)
+                {
+                    result.Clear();
+                    type = null;
+                    return false;
+                }
+
+                result.Add(date);
+            }
+
+            type = typeof(List<DateTime>);
+            return true;
+        }
+    }
+
+    public class ListDecimalConverter : TypeConverter<List<decimal>>
+    {
+        private readonly DecimalConverter _decimalConverter;
+
+        public ListDecimalConverter(CultureInfo culture) { _decimalConverter = new DecimalConverter(culture); }
+
+        public ListDecimalConverter()
+        {
+            var culture = CultureInfo.CurrentCulture;
+            _decimalConverter = new DecimalConverter(culture);
+        }
+
+        public override bool TryParse(string value, out List<decimal> result, out Type type)
+        {
+            string temp = value;
+            temp = temp.Remove(0, 1);
+            temp = temp.Remove(temp.Length - 1, 1);
+            string[] arrs = temp.Split(',');
+
+            result = new List<decimal>();
+            for (var i = 0; i < arrs.Length; i++)
+            {
+                bool flag = _decimalConverter.TryParse(value, out decimal item, out _);
+                if (!flag)
+                {
+                    result.Clear();
+                    type = null;
+                    return false;
+                }
+
+                result.Add(item);
+            }
+
+            type = typeof(List<decimal>);
+            return true;
+        }
+    }
 
     #endregion
 }
