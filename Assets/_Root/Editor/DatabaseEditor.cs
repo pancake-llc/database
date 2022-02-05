@@ -186,6 +186,7 @@ namespace Snorlax.Database.Editor
 
         private void OnButtonClickConnect()
         {
+            TryConvertDataToType(null);
             if (_db == null) ConnectionDatabaseEditorStatic.Show(_connectionString ?? new ConnectionString(), Connect);
         }
 

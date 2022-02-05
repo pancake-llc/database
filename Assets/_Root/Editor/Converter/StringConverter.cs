@@ -22,6 +22,10 @@ namespace Snorlax.Database.Editor
 
         public static StringConverter Default => _default.Value;
 
+        public CultureInfo Culture { get; set; } = CultureInfo.CurrentCulture;
+
+        private UntypedConvertDelegate _stringConverterRef;
+
         private static StringConverter CreateDefault()
         {
             var converter = new StringConverter();
@@ -53,15 +57,13 @@ namespace Snorlax.Database.Editor
             // List<double>
             // List<string>
 
-
-            converter.AddConverter(new StringConverterInternal());
             return converter;
         }
 
-        public CultureInfo Culture { get; set; } = CultureInfo.CurrentCulture;
-
         public void AddConverter<T>(Predicate<string> match, Func<string, T> converter)
         {
+            RemoveStringConverter();
+
             // create converter from match predicate and convert function
             _converters.Add((string value, out object result, out Type type) =>
             {
@@ -76,10 +78,14 @@ namespace Snorlax.Database.Editor
                 type = null;
                 return false;
             });
+
+            AddStringConverter();
         }
 
         public void AddConverter<T>(Regex match, Func<string, T> converter)
         {
+            RemoveStringConverter();
+
             // create converter from match regex and convert function
             _converters.Add((string value, out object result, out Type type) =>
             {
@@ -94,18 +100,28 @@ namespace Snorlax.Database.Editor
                 type = null;
                 return false;
             });
+
+            AddStringConverter();
         }
 
         public void AddConverter<T>(TypedConvertDelegate<T> constructor)
         {
+            RemoveStringConverter();
+
             // create converter from typed TryParse(string, out T) function
             _converters.Add(FromTryPattern(constructor));
+
+            AddStringConverter();
         }
 
         public void AddConverter<T>(TypeConverter<T> typeConverter)
         {
+            RemoveStringConverter();
+
             // create converter from typed TryParse(string, out T) function
             _converters.Add(FromTryPattern(typeConverter));
+
+            AddStringConverter();
         }
 
         public bool TryConvert(string value, out object result, out Type type)
@@ -157,6 +173,24 @@ namespace Snorlax.Database.Editor
                 type = null;
                 return false;
             };
+        }
+
+        // remove string converter in last index to ensure stringConverter is the last converter in the array 
+        private void RemoveStringConverter()
+        {
+            if (_stringConverterRef == null) return;
+
+            _converters.Remove(_stringConverterRef);
+            _stringConverterRef = null;
+        }
+
+        // add string converter in last index
+        private void AddStringConverter()
+        {
+            if (_stringConverterRef != null) RemoveStringConverter();
+
+            _stringConverterRef = FromTryPattern(new StringConverterInternal());
+            _converters.Add(_stringConverterRef);
         }
 
         public void Clear() { _converters.Clear(); }
