@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using LiteDB;
+using Snorlax.Common;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
@@ -413,6 +414,7 @@ namespace Snorlax.Database.Editor
 
         private Type TryConvertDataToType(string data)
         {
+            Debug.Log(Vector2.one.ParseToString());
             // set culture to invariant
             StringConverter.Default.Culture = System.Globalization.CultureInfo.InvariantCulture;
             // add custom converter to default, it will match strings starting with CUSTOM: and return MyCustomClass
@@ -432,9 +434,14 @@ namespace Snorlax.Database.Editor
             //     }
             //     return flag;
             // });
-            
-            var items = new[] {"200", "2504", "4343434343", "-0.500000030", "3.33", "true", "false", "2014-10-10 22:00:00", "CUSTOM: something"};
-            
+
+            var items = new[]
+            {
+                /*"200", "2504", "4343434343", "-0.500000030", "3.33", "true", "false", "2014-10-10 22:00:00", "CUSTOM: something", Vector4.one.ParseToString(),
+                Vector3.one.ParseToString(), Vector2Int.one.ParseToString(), "[1, 3]", "[1, 3.1]", "[3.5,5.6]", "[true, false]", "[\"hello\",\"world\"]",*/
+                "[{\"$date\":\"2022-02-05T11:28:51.1800000Z\"},{\"$date\":\"1996-04-25T00:30:00.0000000Z\"}]"
+            };
+
             foreach (var item in items)
             {
                 object result;

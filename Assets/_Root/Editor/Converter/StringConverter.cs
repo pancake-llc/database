@@ -46,7 +46,7 @@ namespace Snorlax.Database.Editor
             converter.AddConverter(new Vector3IntConverter(converter.Culture));
             converter.AddConverter(new Vector4Converter(converter.Culture));
 
-            // string path :
+            // string path : store under addressable 
             // AudioClip,
             // AnimationClip,
             // Animator,

@@ -4,6 +4,7 @@ using System.Globalization;
 using LiteDB;
 using Snorlax.Common;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace Snorlax.Database.Editor
 {
@@ -413,6 +414,15 @@ namespace Snorlax.Database.Editor
             }
 
             return flag;
+        }
+    }
+
+    // {"$audio":"Attack"}
+    public class AudioClipConverter : TypeConverter<AudioClip>
+    {
+        public override bool TryParse(string value, out AudioClip result, out Type type)
+        {
+            throw null;
         }
     }
 

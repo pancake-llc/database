@@ -27,7 +27,8 @@ namespace Snorlax.Database
                     ["position"] = new BsonArray(1, 2, 3),
                     ["price"] = 30000000000,
                     ["dic"] = BsonMapper.Global.ToDocument(new Dictionary<string, int> {{"melle", 30}, {"range", 10}}),
-                    ["date_create"] = DateTime.UtcNow.Date
+                    ["date_create"] = DateTime.UtcNow.Date,
+                    ["date_purchase"] = new BsonArray(DateTime.UtcNow, new DateTime(1996, 4, 25, 7, 30, 0))
                 };
                 
                 var result = col.FindOne(Query.EQ("_id", i + 1));
@@ -47,7 +48,7 @@ namespace Snorlax.Database
             }
             
             var result22 = col.FindOne(Query.EQ("_id", 1));
-            Debug.Log(result22["position"]);
+            Debug.Log(result22["date_purchase"]);
             // var d = result22["date_create"].ToString();
             // if (d.Contains("\"$date\":"))
             // {

@@ -11,6 +11,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "com.unity.addressables": "1.18.19"
   },
   "repository": {
     "type": "git",
