@@ -39,6 +39,15 @@ namespace Snorlax.Database.Editor
             converter.AddConverter(new GuidConverter());
             converter.AddConverter(new ObjectIdConverter());
             converter.AddConverter(new ColorConverter());
+            converter.AddConverter(new Vector2Converter(converter.Culture));
+            converter.AddConverter(new Vector2IntConverter(converter.Culture));
+            converter.AddConverter(new Vector3Converter(converter.Culture));
+            converter.AddConverter(new Vector3IntConverter(converter.Culture));
+            converter.AddConverter(new Vector4Converter(converter.Culture));
+
+            //vector2
+            //vector3
+            //quaterinon
 
             // string path :
             // AudioClip,

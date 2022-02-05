@@ -11,7 +11,7 @@ namespace Snorlax.Database.Editor
         public abstract bool TryParse(string value, out T result, out Type type);
     }
 
-    #region type
+    #region primitive
 
     public class BoolConverter : TypeConverter<bool>
     {
@@ -98,6 +98,47 @@ namespace Snorlax.Database.Editor
         }
     }
 
+
+    // {"$numberDecimal":"122.9991"}
+    public class DecimalConverter : TypeConverter<decimal>
+    {
+        private readonly CultureInfo _culture;
+
+        public DecimalConverter(CultureInfo culture) { _culture = culture; }
+
+        public DecimalConverter() { _culture = CultureInfo.CurrentCulture; }
+
+        public override bool TryParse(string value, out decimal result, out Type type)
+        {
+            var flag = false;
+            decimal tmp = 0;
+            if (value.Contains("\"$numberDecimal\":"))
+            {
+                string realValue = value.Replace("{\"$numberDecimal\":\"", "");
+                realValue = realValue.Remove(realValue.Length - 2, 2);
+                flag = decimal.TryParse(realValue, NumberStyles.Integer, _culture, out tmp);
+            }
+
+            result = tmp;
+            type = flag ? typeof(decimal) : null;
+            return flag;
+        }
+    }
+
+    public class StringConverterInternal : TypeConverter<string>
+    {
+        public override bool TryParse(string value, out string result, out Type type)
+        {
+            result = value;
+            type = typeof(string);
+            return true;
+        }
+    }
+
+    #endregion
+
+    #region .net
+
     // {"$date":"2022-02-04T16:52:56.7130000Z"}
     public class DateTimeConverter : TypeConverter<DateTime>
     {
@@ -143,31 +184,9 @@ namespace Snorlax.Database.Editor
         }
     }
 
-    // {"$numberDecimal":"122.9991"}
-    public class DecimalConverter : TypeConverter<decimal>
-    {
-        private readonly CultureInfo _culture;
+    #endregion
 
-        public DecimalConverter(CultureInfo culture) { _culture = culture; }
-
-        public DecimalConverter() { _culture = CultureInfo.CurrentCulture; }
-
-        public override bool TryParse(string value, out decimal result, out Type type)
-        {
-            var flag = false;
-            decimal tmp = 0;
-            if (value.Contains("\"$numberDecimal\":"))
-            {
-                string realValue = value.Replace("{\"$numberDecimal\":\"", "");
-                realValue = realValue.Remove(realValue.Length - 2, 2);
-                flag = decimal.TryParse(realValue, NumberStyles.Integer, _culture, out tmp);
-            }
-
-            result = tmp;
-            type = flag ? typeof(decimal) : null;
-            return flag;
-        }
-    }
+    #region unity
 
     // {"$oid":"507f1f55bcf96cd799438110"}
     public class ObjectIdConverter : TypeConverter<ObjectId>
@@ -200,15 +219,205 @@ namespace Snorlax.Database.Editor
         }
     }
 
-    public class StringConverterInternal : TypeConverter<string>
+    // {"$v2":"1.0:1.0"}
+    public class Vector2Converter : TypeConverter<Vector2>
     {
-        public override bool TryParse(string value, out string result, out Type type)
+        private readonly CultureInfo _culture;
+
+        public Vector2Converter(CultureInfo culture) { _culture = culture; }
+
+        public Vector2Converter() { _culture = CultureInfo.CurrentCulture; }
+
+        public override bool TryParse(string value, out Vector2 result, out Type type)
         {
-            result = value;
-            type = typeof(string);
-            return true;
+            var flag = false;
+            var realValue = string.Empty;
+            if (value.Contains("\"$v2\":"))
+            {
+                realValue = value.Replace("{\"$v2\":\"", "");
+                realValue = realValue.Remove(realValue.Length - 2, 2);
+                flag = true;
+            }
+
+            if (flag)
+            {
+                result = Vector2.zero;
+                string[] vectors = realValue.Split(':');
+                float.TryParse(vectors[0], NumberStyles.Number, _culture, out result.x);
+                float.TryParse(vectors[1], NumberStyles.Number, _culture, out result.y);
+                type = typeof(Vector2);
+            }
+            else
+            {
+                result = Vector2.zero;
+                type = null;
+            }
+
+            return flag;
         }
     }
+
+    // {"$v2Int":"1:1"}
+    public class Vector2IntConverter : TypeConverter<Vector2Int>
+    {
+        private readonly CultureInfo _culture;
+
+        public Vector2IntConverter(CultureInfo culture) { _culture = culture; }
+
+        public Vector2IntConverter() { _culture = CultureInfo.CurrentCulture; }
+
+        public override bool TryParse(string value, out Vector2Int result, out Type type)
+        {
+            var flag = false;
+            var realValue = string.Empty;
+            if (value.Contains("\"$v2Int\":"))
+            {
+                realValue = value.Replace("{\"$v2Int\":\"", "");
+                realValue = realValue.Remove(realValue.Length - 2, 2);
+                flag = true;
+            }
+
+            if (flag)
+            {
+                result = Vector2Int.zero;
+                string[] vectors = realValue.Split(':');
+                int.TryParse(vectors[0], NumberStyles.Integer, _culture, out int resultX);
+                int.TryParse(vectors[1], NumberStyles.Integer, _culture, out int resultY);
+                result.Set(resultX, resultY);
+                type = typeof(Vector2Int);
+            }
+            else
+            {
+                result = Vector2Int.zero;
+                type = null;
+            }
+
+            return flag;
+        }
+    }
+
+    // {"$v3":"1.0:1.0:1.0"}
+    public class Vector3Converter : TypeConverter<Vector3>
+    {
+        private readonly CultureInfo _culture;
+
+        public Vector3Converter(CultureInfo culture) { _culture = culture; }
+
+        public Vector3Converter() { _culture = CultureInfo.CurrentCulture; }
+
+        public override bool TryParse(string value, out Vector3 result, out Type type)
+        {
+            var flag = false;
+            var realValue = string.Empty;
+            if (value.Contains("\"$v3\":"))
+            {
+                realValue = value.Replace("{\"$v3\":\"", "");
+                realValue = realValue.Remove(realValue.Length - 2, 2);
+                flag = true;
+            }
+
+            if (flag)
+            {
+                result = Vector3.zero;
+                string[] vectors = realValue.Split(':');
+                float.TryParse(vectors[0], NumberStyles.Number, _culture, out result.x);
+                float.TryParse(vectors[1], NumberStyles.Number, _culture, out result.y);
+                float.TryParse(vectors[2], NumberStyles.Number, _culture, out result.z);
+                type = typeof(Vector3);
+            }
+            else
+            {
+                result = Vector3.zero;
+                type = null;
+            }
+
+            return flag;
+        }
+    }
+
+    // {"$v3Int":"1:1:1"}
+    public class Vector3IntConverter : TypeConverter<Vector3Int>
+    {
+        private readonly CultureInfo _culture;
+
+        public Vector3IntConverter(CultureInfo culture) { _culture = culture; }
+
+        public Vector3IntConverter() { _culture = CultureInfo.CurrentCulture; }
+
+        public override bool TryParse(string value, out Vector3Int result, out Type type)
+        {
+            var flag = false;
+            var realValue = string.Empty;
+            if (value.Contains("\"$v3Int\":"))
+            {
+                realValue = value.Replace("{\"$v3Int\":\"", "");
+                realValue = realValue.Remove(realValue.Length - 2, 2);
+                flag = true;
+            }
+
+            if (flag)
+            {
+                result = Vector3Int.zero;
+                string[] vectors = realValue.Split(':');
+                int.TryParse(vectors[0], NumberStyles.Integer, _culture, out int resultX);
+                int.TryParse(vectors[1], NumberStyles.Integer, _culture, out int resultY);
+                int.TryParse(vectors[2], NumberStyles.Integer, _culture, out int resultZ);
+                result.Set(resultX, resultY, resultZ);
+                type = typeof(Vector3Int);
+            }
+            else
+            {
+                result = Vector3Int.zero;
+                type = null;
+            }
+
+            return flag;
+        }
+    }
+    
+    // {"$v4":"1.0:1.0:1.0:1.0"}
+    public class Vector4Converter : TypeConverter<Vector4>
+    {
+        private readonly CultureInfo _culture;
+
+        public Vector4Converter(CultureInfo culture) { _culture = culture; }
+
+        public Vector4Converter() { _culture = CultureInfo.CurrentCulture; }
+
+        public override bool TryParse(string value, out Vector4 result, out Type type)
+        {
+            var flag = false;
+            var realValue = string.Empty;
+            if (value.Contains("\"$v4\":"))
+            {
+                realValue = value.Replace("{\"$v4\":\"", "");
+                realValue = realValue.Remove(realValue.Length - 2, 2);
+                flag = true;
+            }
+
+            if (flag)
+            {
+                result = Vector4.zero;
+                string[] vectors = realValue.Split(':');
+                float.TryParse(vectors[0], NumberStyles.Number, _culture, out result.x);
+                float.TryParse(vectors[1], NumberStyles.Number, _culture, out result.y);
+                float.TryParse(vectors[2], NumberStyles.Number, _culture, out result.z);
+                float.TryParse(vectors[3], NumberStyles.Number, _culture, out result.w);
+                type = typeof(Vector4);
+            }
+            else
+            {
+                result = Vector4.zero;
+                type = null;
+            }
+
+            return flag;
+        }
+    }
+
+    #endregion
+
+    #region collection
 
     #endregion
 }
