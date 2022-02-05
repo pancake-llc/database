@@ -47,14 +47,14 @@ namespace Snorlax.Database
             }
             
             var result22 = col.FindOne(Query.EQ("_id", 1));
-            Debug.Log(result22["date_create"]);
-            var d = result22["date_create"].ToString();
-            if (d.Contains("\"$date\":"))
-            {
-                string realValue = d.Replace("{\"$date\":\"", "");
-                realValue = realValue.Remove(realValue.Length - 2, 2);
-                Debug.Log(realValue);
-            }
+            Debug.Log(result22["position"]);
+            // var d = result22["date_create"].ToString();
+            // if (d.Contains("\"$date\":"))
+            // {
+            //     string realValue = d.Replace("{\"$date\":\"", "");
+            //     realValue = realValue.Remove(realValue.Length - 2, 2);
+            //     Debug.Log(realValue);
+            // }
         }
     }
 }
