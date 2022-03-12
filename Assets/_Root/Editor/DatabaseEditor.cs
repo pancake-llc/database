@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -187,7 +188,6 @@ namespace Snorlax.Database.Editor
 
         private void OnButtonClickConnect()
         {
-            TryConvertDataToType(null);
             if (_db == null) ConnectionDatabaseEditorStatic.Show(_connectionString ?? new ConnectionString(), Connect);
         }
 
@@ -412,61 +412,10 @@ namespace Snorlax.Database.Editor
             }
         }
 
-        private Type TryConvertDataToType(string data)
+        private static Type TryConvertDataToType(string data, out object result, CultureInfo cultureInfo = null)
         {
-            Debug.Log(Vector2.one.ParseToString());
-            // set culture to invariant
-            StringConverter.Default.Culture = System.Globalization.CultureInfo.InvariantCulture;
-            // add custom converter to default, it will match strings starting with CUSTOM: and return MyCustomClass
-            //StringConverter.Default.Clear();
-            // StringConverter.Default.AddConverter((string value, out bool result) =>
-            // {
-            //     var flag = bool.TryParse(value, out result);
-            //
-            //     if (flag) 
-            //     {
-            //         var typeResult = typeof(bool);
-            //         Debug.Log("type boolean");
-            //     }
-            //     else
-            //     {
-            //         Debug.Log("parse value:" + value);
-            //     }
-            //     return flag;
-            // });
-
-            var items = new[]
-            {
-                /*"200", "2504", "4343434343", "-0.500000030", "3.33", "true", "false", "2014-10-10 22:00:00", "CUSTOM: something", Vector4.one.ParseToString(),
-                Vector3.one.ParseToString(), Vector2Int.one.ParseToString(), "[1, 3]", "[1, 3.1]", "[3.5,5.6]", "[true, false]", "[\"hello\",\"world\"]",*/
-                "[{\"$date\":\"2022-02-05T11:28:51.1800000Z\"},{\"$date\":\"1996-04-25T00:30:00.0000000Z\"}]"
-            };
-
-            foreach (var item in items)
-            {
-                object result;
-                Type type;
-                if (StringConverter.Default.TryConvert(item, out result, out type))
-                {
-                    Debug.Log("value :" + result + "   type:" + type);
-                }
-            }
-
-            // create new non-default converter
-            var localConverter = new StringConverter();
-            // // add custom converter to parse json which matches schema for MySecondCustomClass
-            // localConverter.AddConverter((string value, out MySecondCustomClass result) => TryParseJson(value, @"{'value': {'type': 'string'}}", out result));
-            // {
-            //     object result;
-            //     // check if that works
-            //     if (localConverter.TryConvert("{value: \"Some value\"}", out result))
-            //     {
-            //         Console.WriteLine(((MySecondCustomClass) result).Value);
-            //     }
-            // }
-            //Console.ReadKey();
-
-            return default;
+            StringConverter.Default.Culture = cultureInfo ?? CultureInfo.InvariantCulture;
+            return StringConverter.Default.TryConvert(data, out result, out var type) ? type : null;
         }
 
         #endregion

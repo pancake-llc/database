@@ -4,7 +4,6 @@ using System.Globalization;
 using LiteDB;
 using Snorlax.Common;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 
 namespace Snorlax.Database.Editor
 {
