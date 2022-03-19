@@ -21,7 +21,7 @@ namespace Snorlax.Database.Editor
         private TaskData _task;
 
         [SerializeField] private TreeViewState treeViewState;
-        private DbCollectionTreeView _treeView;
+        private DatabaseCollectionTreeView _treeView;
 
         [SerializeField] private TreeViewState filterTreeViewState;
         private DatabaseTreeView _databaseTreeView;
@@ -56,7 +56,7 @@ namespace Snorlax.Database.Editor
         private void OnGUI()
         {
             _task ??= new TaskData();
-            _treeView ??= new DbCollectionTreeView(treeViewState) {onSelected = OnSetCurrentTableSelected};
+            _treeView ??= new DatabaseCollectionTreeView(treeViewState) {onSelected = OnSetCurrentTableSelected};
             _groupStyle ??= new GUIStyle(GUI.skin.box);
 
             #region header
@@ -343,7 +343,7 @@ namespace Snorlax.Database.Editor
             var filters = document.RawValue;
             foreach (var value in filters)
             {
-                reader.dictData.Add(value.Key, value.Value.ToString());
+                reader.dictData.Add(value.Key, value.Value.ToString().Replace("\"", ""));
             }
         }
 
@@ -400,6 +400,7 @@ namespace Snorlax.Database.Editor
 
                 var calculatedRowHeight = 0f;
                 var rowRect = new Rect(columnRectPrototype);
+                rowRect.y += heightJump * (i + 1);
 
                 for (int j = 0; j < _columns.Length; j++)
                 {
@@ -407,7 +408,32 @@ namespace Snorlax.Database.Editor
                     var columnRect = _multiColumnHeader.GetColumnRect(visibleColumnIndex);
                     columnRect.y = rowRect.y + heightJump;
 
-                    GUIStyle nameFieldGUIStyle = new GUIStyle(GUI.skin.label) {padding = new RectOffset(left: 10, right: 10, top: 2, bottom: 2)};
+                    var nameFieldGUIStyle = new GUIStyle(GUI.skin.label) {padding = new RectOffset(10, 10, 2, 2)};
+
+                    var pos = _multiColumnHeader.GetCellRect(visibleColumnIndex, columnRect);
+                    pos.position -= new Vector2(-5, 0);
+                    pos.width -= 5;
+                    var type = TryConvertDataToType(_rowDatas[i].dictData[_headerData[j]], out object result);
+                    if (type == typeof(int))
+                    {
+                        _rowDatas[i].dictData[_headerData[j]] = EditorGUI.IntField(pos,
+                                GUIContent.none,
+                                int.Parse(_rowDatas[i].dictData[_headerData[j]]),
+                                EditorStyles.textField)
+                            .ToString();
+                    }
+                    else if (type == typeof(float))
+                    {
+                        _rowDatas[i].dictData[_headerData[j]] = EditorGUI.FloatField(pos,
+                                GUIContent.none,
+                                float.Parse(_rowDatas[i].dictData[_headerData[j]]),
+                                EditorStyles.textField)
+                            .ToString(CultureInfo.InvariantCulture);
+                    }
+                    else if (type == typeof(string))
+                    {
+                        _rowDatas[i].dictData[_headerData[j]] = EditorGUI.TextField(pos, GUIContent.none, _rowDatas[i].dictData[_headerData[j]], EditorStyles.textField);
+                    }
                 }
             }
         }

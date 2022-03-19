@@ -124,5 +124,7 @@ namespace Snorlax.Database.Editor
             texture.Apply(false);
             return texture;
         }
+        
+        public static bool IsCollectionForDB(this string value) => value[0].Equals('[') && value[value.Length - 1].Equals(']');
     }
 }

@@ -419,10 +419,7 @@ namespace Snorlax.Database.Editor
     // {"$audio":"Attack"}
     public class AudioClipConverter : TypeConverter<AudioClip>
     {
-        public override bool TryParse(string value, out AudioClip result, out Type type)
-        {
-            throw null;
-        }
+        public override bool TryParse(string value, out AudioClip result, out Type type) { throw null!; }
     }
 
     #endregion
@@ -434,6 +431,13 @@ namespace Snorlax.Database.Editor
         // [true,false]
         public override bool TryParse(string value, out List<bool> result, out Type type)
         {
+            if (!value.IsCollectionForDB())
+            {
+                result = null;
+                type = null;
+                return false;
+            }
+
             string temp = value;
             temp = temp.Remove(0, 1);
             temp = temp.Remove(temp.Length - 1, 1);
@@ -456,6 +460,8 @@ namespace Snorlax.Database.Editor
             type = typeof(List<bool>);
             return true;
         }
+
+        private bool IsCollection(string value) => value[0].Equals('[') && value[value.Length - 1].Equals(']');
     }
 
     public class ListInt32Converter : TypeConverter<List<int>>
@@ -472,6 +478,13 @@ namespace Snorlax.Database.Editor
 
         public override bool TryParse(string value, out List<int> result, out Type type)
         {
+            if (!value.IsCollectionForDB())
+            {
+                result = null;
+                type = null;
+                return false;
+            }
+
             string temp = value;
             temp = temp.Remove(0, 1);
             temp = temp.Remove(temp.Length - 1, 1);
@@ -510,6 +523,13 @@ namespace Snorlax.Database.Editor
 
         public override bool TryParse(string value, out List<long> result, out Type type)
         {
+            if (!value.IsCollectionForDB())
+            {
+                result = null;
+                type = null;
+                return false;
+            }
+
             string temp = value;
             temp = temp.Remove(0, 1);
             temp = temp.Remove(temp.Length - 1, 1);
@@ -548,6 +568,13 @@ namespace Snorlax.Database.Editor
 
         public override bool TryParse(string value, out List<float> result, out Type type)
         {
+            if (!value.IsCollectionForDB())
+            {
+                result = null;
+                type = null;
+                return false;
+            }
+
             string temp = value;
             temp = temp.Remove(0, 1);
             temp = temp.Remove(temp.Length - 1, 1);
@@ -586,6 +613,13 @@ namespace Snorlax.Database.Editor
 
         public override bool TryParse(string value, out List<double> result, out Type type)
         {
+            if (!value.IsCollectionForDB())
+            {
+                result = null;
+                type = null;
+                return false;
+            }
+
             string temp = value;
             temp = temp.Remove(0, 1);
             temp = temp.Remove(temp.Length - 1, 1);
@@ -614,6 +648,13 @@ namespace Snorlax.Database.Editor
     {
         public override bool TryParse(string value, out List<string> result, out Type type)
         {
+            if (!value.IsCollectionForDB())
+            {
+                result = null;
+                type = null;
+                return false;
+            }
+
             string temp = value;
             temp = temp.Remove(0, 1);
             temp = temp.Remove(temp.Length - 1, 1);
@@ -640,6 +681,13 @@ namespace Snorlax.Database.Editor
 
         public override bool TryParse(string value, out List<DateTime> result, out Type type)
         {
+            if (!value.IsCollectionForDB())
+            {
+                result = null;
+                type = null;
+                return false;
+            }
+
             string temp = value;
             temp = temp.Remove(0, 1);
             temp = temp.Remove(temp.Length - 1, 1);
@@ -678,6 +726,13 @@ namespace Snorlax.Database.Editor
 
         public override bool TryParse(string value, out List<decimal> result, out Type type)
         {
+            if (!value.IsCollectionForDB())
+            {
+                result = null;
+                type = null;
+                return false;
+            }
+
             string temp = value;
             temp = temp.Remove(0, 1);
             temp = temp.Remove(temp.Length - 1, 1);

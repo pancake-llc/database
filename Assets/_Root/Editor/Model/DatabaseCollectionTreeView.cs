@@ -6,13 +6,13 @@ using UnityEngine;
 
 namespace Snorlax.Database.Editor
 {
-    public class DbCollectionTreeView : TreeView
+    public class DatabaseCollectionTreeView : TreeView
     {
         public List<TreeViewItem> Items { get; set; } = new List<TreeViewItem>();
         public int selectedId;
         public Action<string> onSelected;
 
-        public DbCollectionTreeView(TreeViewState state)
+        public DatabaseCollectionTreeView(TreeViewState state)
             : base(state)
         {
             showAlternatingRowBackgrounds = false;
