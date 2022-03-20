@@ -317,15 +317,17 @@ namespace Snorlax.Database.Editor
             _columns = new MultiColumnHeaderState.Column[_headerData.Count];
             for (var i = 0; i < _headerData.Count; i++)
             {
+                var type = TryConvertDataToType(_rowDatas[0].dictData[_headerData[i]], out _);
                 _columns[i] = new MultiColumnHeaderState.Column
                 {
                     allowToggleVisibility = false,
                     headerContent = new GUIContent(_headerData[i]),
-                    minWidth = GetMinHeaderWidth(null),
-                    maxWidth = GetMaxHeaderWidth(null),
+                    minWidth = GetMinHeaderWidth(type),
+                    maxWidth = GetMaxHeaderWidth(type),
                     autoResize = true,
                     canSort = false
                 };
+
                 _columns[i].width = _columns[i].minWidth;
             }
 
@@ -343,13 +345,30 @@ namespace Snorlax.Database.Editor
             var filters = document.RawValue;
             foreach (var value in filters)
             {
-                reader.dictData.Add(value.Key, value.Value.ToString().Replace("\"", ""));
+                reader.dictData.Add(value.Key, value.Value.ToString().Replace("\\", "").Replace("\"", ""));
             }
         }
 
         private float GetMinHeaderWidth(Type type)
         {
-            float newSize = 85;
+            float newSize = 100;
+            if (type == typeof(bool))
+            {
+                newSize = 60;
+            }
+            else if (type == typeof(Vector2) || type == typeof(Vector2Int))
+            {
+                newSize = 125;
+            }
+            else if (type == typeof(Vector3) || type == typeof(Vector3Int))
+            {
+                newSize = 160;
+            }
+            else if (type == typeof(Vector4))
+            {
+                newSize = 200;
+            }
+
             // todo
             return newSize;
         }
@@ -400,7 +419,7 @@ namespace Snorlax.Database.Editor
 
                 var calculatedRowHeight = 0f;
                 var rowRect = new Rect(columnRectPrototype);
-                rowRect.y += heightJump * (i + 1);
+                rowRect.y += heightJump * (i + 1) * 1.3f;
 
                 for (int j = 0; j < _columns.Length; j++)
                 {
@@ -414,11 +433,25 @@ namespace Snorlax.Database.Editor
                     pos.position -= new Vector2(-5, 0);
                     pos.width -= 5;
                     var type = TryConvertDataToType(_rowDatas[i].dictData[_headerData[j]], out object result);
-                    if (type == typeof(int))
+                    if (type == typeof(bool))
+                    {
+                        int indexSelection = _rowDatas[i].dictData[_headerData[j]].ToLower().Equals("true") ? 0 : 1;
+                        indexSelection = EditorGUI.Popup(pos, "", indexSelection, new[] {"True", "False"});
+                        _rowDatas[i].dictData[_headerData[j]] = indexSelection == 0 ? "True" : "False";
+                    }
+                    else if (type == typeof(int))
                     {
                         _rowDatas[i].dictData[_headerData[j]] = EditorGUI.IntField(pos,
                                 GUIContent.none,
                                 int.Parse(_rowDatas[i].dictData[_headerData[j]]),
+                                EditorStyles.textField)
+                            .ToString();
+                    }
+                    else if (type == typeof(long))
+                    {
+                        _rowDatas[i].dictData[_headerData[j]] = EditorGUI.LongField(pos,
+                                GUIContent.none,
+                                long.Parse(_rowDatas[i].dictData[_headerData[j]]),
                                 EditorStyles.textField)
                             .ToString();
                     }
@@ -429,6 +462,66 @@ namespace Snorlax.Database.Editor
                                 float.Parse(_rowDatas[i].dictData[_headerData[j]]),
                                 EditorStyles.textField)
                             .ToString(CultureInfo.InvariantCulture);
+                    }
+                    else if (type == typeof(double))
+                    {
+                        _rowDatas[i].dictData[_headerData[j]] = EditorGUI.DoubleField(pos,
+                                GUIContent.none,
+                                double.Parse(_rowDatas[i].dictData[_headerData[j]]),
+                                EditorStyles.textField)
+                            .ToString(CultureInfo.InvariantCulture);
+                    }
+                    else if (type == typeof(DateTime))
+                    {
+                        _rowDatas[i].dictData[_headerData[j]] = EditorGUI.TextField(pos, GUIContent.none, _rowDatas[i].dictData[_headerData[j]], EditorStyles.textField);
+                    }
+                    else if (type == typeof(decimal))
+                    {
+                        _rowDatas[i].dictData[_headerData[j]] = EditorGUI.TextField(pos, GUIContent.none, _rowDatas[i].dictData[_headerData[j]], EditorStyles.textField);
+                    }
+                    else if (type == typeof(GuidConverter))
+                    {
+                        _rowDatas[i].dictData[_headerData[j]] = EditorGUI.TextField(pos, GUIContent.none, _rowDatas[i].dictData[_headerData[j]], EditorStyles.textField);
+                    }
+                    else if (type == typeof(ObjectId))
+                    {
+                        _rowDatas[i].dictData[_headerData[j]] = EditorGUI.TextField(pos, GUIContent.none, _rowDatas[i].dictData[_headerData[j]], EditorStyles.textField);
+                    }
+                    else if (type == typeof(Color))
+                    {
+                        _rowDatas[i].dictData[_headerData[j]].TryParseHtmlString(out var colorResult);
+                        _rowDatas[i].dictData[_headerData[j]] = EditorGUI.ColorField(pos,
+                                GUIContent.none,
+                                colorResult,
+                                true,
+                                false,
+                                false)
+                            .ToHtmlStringRGBA();
+                    }
+                    else if (type == typeof(Vector2))
+                    {
+                        var vector2 = Vector2Converter.ValueOf(_rowDatas[i].dictData[_headerData[j]], StringConverter.Default.Culture);
+                        vector2 = EditorGUI.Vector2Field(pos, GUIContent.none, vector2);
+                    }
+                    else if (type == typeof(Vector2Int))
+                    {
+                        var vector2Int = Vector2IntConverter.ValueOf(_rowDatas[i].dictData[_headerData[j]], StringConverter.Default.Culture);
+                        vector2Int = EditorGUI.Vector2IntField(pos, GUIContent.none, vector2Int);
+                    }
+                    else if (type == typeof(Vector3))
+                    {
+                        var vector3 = Vector3Converter.ValueOf(_rowDatas[i].dictData[_headerData[j]], StringConverter.Default.Culture);
+                        vector3 = EditorGUI.Vector3Field(pos, GUIContent.none, vector3);
+                    }
+                    else if (type == typeof(Vector3Int))
+                    {
+                        var vector3Int = Vector3IntConverter.ValueOf(_rowDatas[i].dictData[_headerData[j]], StringConverter.Default.Culture);
+                        vector3Int = EditorGUI.Vector3IntField(pos, GUIContent.none, vector3Int);
+                    }
+                    else if (type == typeof(Vector4))
+                    {
+                        var vector4 = Vector3Converter.ValueOf(_rowDatas[i].dictData[_headerData[j]], StringConverter.Default.Culture);
+                        vector4 = EditorGUI.Vector4Field(pos, GUIContent.none, vector4);
                     }
                     else if (type == typeof(string))
                     {

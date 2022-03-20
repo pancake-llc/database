@@ -231,21 +231,11 @@ namespace Snorlax.Database.Editor
 
         public override bool TryParse(string value, out Vector2 result, out Type type)
         {
-            var flag = false;
-            var realValue = string.Empty;
-            if (value.Contains("\"$v2\":"))
-            {
-                realValue = value.Replace("{\"$v2\":\"", "");
-                realValue = realValue.Remove(realValue.Length - 2, 2);
-                flag = true;
-            }
+            bool flag = value.Contains("{$v2:");
 
             if (flag)
             {
-                result = Vector2.zero;
-                string[] vectors = realValue.Split(':');
-                float.TryParse(vectors[0], NumberStyles.Number, _culture, out result.x);
-                float.TryParse(vectors[1], NumberStyles.Number, _culture, out result.y);
+                result = ValueOf(value, _culture);
                 type = typeof(Vector2);
             }
             else
@@ -255,6 +245,17 @@ namespace Snorlax.Database.Editor
             }
 
             return flag;
+        }
+
+        internal static Vector2 ValueOf(string value, CultureInfo cultureInfo)
+        {
+            string realValue = value.Replace("{$v2:", "");
+            realValue = realValue.Remove(realValue.Length - 2, 2);
+            var result = Vector2.zero;
+            string[] vectors = realValue.Split(':');
+            float.TryParse(vectors[0], NumberStyles.Number, cultureInfo, out result.x);
+            float.TryParse(vectors[1], NumberStyles.Number, cultureInfo, out result.y);
+            return result;
         }
     }
 
@@ -269,22 +270,11 @@ namespace Snorlax.Database.Editor
 
         public override bool TryParse(string value, out Vector2Int result, out Type type)
         {
-            var flag = false;
-            var realValue = string.Empty;
-            if (value.Contains("\"$v2Int\":"))
-            {
-                realValue = value.Replace("{\"$v2Int\":\"", "");
-                realValue = realValue.Remove(realValue.Length - 2, 2);
-                flag = true;
-            }
+            bool flag = value.Contains("{$v2Int:");
 
             if (flag)
             {
-                result = Vector2Int.zero;
-                string[] vectors = realValue.Split(':');
-                int.TryParse(vectors[0], NumberStyles.Integer, _culture, out int resultX);
-                int.TryParse(vectors[1], NumberStyles.Integer, _culture, out int resultY);
-                result.Set(resultX, resultY);
+                result = ValueOf(value, _culture);
                 type = typeof(Vector2Int);
             }
             else
@@ -294,6 +284,18 @@ namespace Snorlax.Database.Editor
             }
 
             return flag;
+        }
+
+        internal static Vector2Int ValueOf(string value, CultureInfo cultureInfo)
+        {
+            string realValue = value.Replace("{$v2Int:", "");
+            realValue = realValue.Remove(realValue.Length - 2, 2);
+            var result = Vector2Int.zero;
+            string[] vectors = realValue.Split(':');
+            int.TryParse(vectors[0], NumberStyles.Integer, cultureInfo, out int resultX);
+            int.TryParse(vectors[1], NumberStyles.Integer, cultureInfo, out int resultY);
+            result.Set(resultX, resultY);
+            return result;
         }
     }
 
@@ -308,22 +310,11 @@ namespace Snorlax.Database.Editor
 
         public override bool TryParse(string value, out Vector3 result, out Type type)
         {
-            var flag = false;
-            var realValue = string.Empty;
-            if (value.Contains("\"$v3\":"))
-            {
-                realValue = value.Replace("{\"$v3\":\"", "");
-                realValue = realValue.Remove(realValue.Length - 2, 2);
-                flag = true;
-            }
+            bool flag = value.Contains("{$v3:");
 
             if (flag)
             {
-                result = Vector3.zero;
-                string[] vectors = realValue.Split(':');
-                float.TryParse(vectors[0], NumberStyles.Number, _culture, out result.x);
-                float.TryParse(vectors[1], NumberStyles.Number, _culture, out result.y);
-                float.TryParse(vectors[2], NumberStyles.Number, _culture, out result.z);
+                result = ValueOf(value, _culture);
                 type = typeof(Vector3);
             }
             else
@@ -333,6 +324,18 @@ namespace Snorlax.Database.Editor
             }
 
             return flag;
+        }
+
+        internal static Vector3 ValueOf(string value, CultureInfo cultureInfo)
+        {
+            string realValue = value.Replace("{$v3:", "");
+            realValue = realValue.Remove(realValue.Length - 2, 2);
+            var result = Vector3.zero;
+            string[] vectors = realValue.Split(':');
+            float.TryParse(vectors[0], NumberStyles.Number, cultureInfo, out result.x);
+            float.TryParse(vectors[1], NumberStyles.Number, cultureInfo, out result.y);
+            float.TryParse(vectors[2], NumberStyles.Number, cultureInfo, out result.z);
+            return result;
         }
     }
 
@@ -347,23 +350,11 @@ namespace Snorlax.Database.Editor
 
         public override bool TryParse(string value, out Vector3Int result, out Type type)
         {
-            var flag = false;
-            var realValue = string.Empty;
-            if (value.Contains("\"$v3Int\":"))
-            {
-                realValue = value.Replace("{\"$v3Int\":\"", "");
-                realValue = realValue.Remove(realValue.Length - 2, 2);
-                flag = true;
-            }
+            bool flag = value.Contains("{$v3Int:");
 
             if (flag)
             {
-                result = Vector3Int.zero;
-                string[] vectors = realValue.Split(':');
-                int.TryParse(vectors[0], NumberStyles.Integer, _culture, out int resultX);
-                int.TryParse(vectors[1], NumberStyles.Integer, _culture, out int resultY);
-                int.TryParse(vectors[2], NumberStyles.Integer, _culture, out int resultZ);
-                result.Set(resultX, resultY, resultZ);
+                result = ValueOf(value, _culture);
                 type = typeof(Vector3Int);
             }
             else
@@ -373,6 +364,19 @@ namespace Snorlax.Database.Editor
             }
 
             return flag;
+        }
+
+        internal static Vector3Int ValueOf(string value, CultureInfo cultureInfo)
+        {
+            string realValue = value.Replace("{$v3Int:", "");
+            realValue = realValue.Remove(realValue.Length - 2, 2);
+            var result = Vector3Int.zero;
+            string[] vectors = realValue.Split(':');
+            int.TryParse(vectors[0], NumberStyles.Integer, cultureInfo, out int resultX);
+            int.TryParse(vectors[1], NumberStyles.Integer, cultureInfo, out int resultY);
+            int.TryParse(vectors[2], NumberStyles.Integer, cultureInfo, out int resultZ);
+            result.Set(resultX, resultY, resultZ);
+            return result;
         }
     }
 
@@ -387,23 +391,11 @@ namespace Snorlax.Database.Editor
 
         public override bool TryParse(string value, out Vector4 result, out Type type)
         {
-            var flag = false;
-            var realValue = string.Empty;
-            if (value.Contains("\"$v4\":"))
-            {
-                realValue = value.Replace("{\"$v4\":\"", "");
-                realValue = realValue.Remove(realValue.Length - 2, 2);
-                flag = true;
-            }
+            bool flag = value.Contains("{$v4:");
 
             if (flag)
             {
-                result = Vector4.zero;
-                string[] vectors = realValue.Split(':');
-                float.TryParse(vectors[0], NumberStyles.Number, _culture, out result.x);
-                float.TryParse(vectors[1], NumberStyles.Number, _culture, out result.y);
-                float.TryParse(vectors[2], NumberStyles.Number, _culture, out result.z);
-                float.TryParse(vectors[3], NumberStyles.Number, _culture, out result.w);
+                result = ValueOf(value, _culture);
                 type = typeof(Vector4);
             }
             else
@@ -413,6 +405,19 @@ namespace Snorlax.Database.Editor
             }
 
             return flag;
+        }
+
+        internal static Vector4 ValueOf(string value, CultureInfo cultureInfo)
+        {
+            string realValue = value.Replace("{$v4:", "");
+            realValue = realValue.Remove(realValue.Length - 2, 2);
+            var result = Vector4.zero;
+            string[] vectors = realValue.Split(':');
+            float.TryParse(vectors[0], NumberStyles.Number, cultureInfo, out result.x);
+            float.TryParse(vectors[1], NumberStyles.Number, cultureInfo, out result.y);
+            float.TryParse(vectors[2], NumberStyles.Number, cultureInfo, out result.z);
+            float.TryParse(vectors[3], NumberStyles.Number, cultureInfo, out result.w);
+            return result;
         }
     }
 

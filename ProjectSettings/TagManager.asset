@@ -3,7 +3,18 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - alt_color_6
+  - alt_color_5
+  - alt_color_4
+  - alt_color_3
+  - alt_color_2
+  - alt_color_1
+  - calendar_button
+  - calendar_bg
+  - dark_color
+  - white_color
+  - light_color
   layers:
   - Default
   - TransparentFX

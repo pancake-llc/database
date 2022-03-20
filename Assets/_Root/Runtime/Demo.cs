@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using LiteDB;
+using Snorlax.Common;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -10,6 +11,8 @@ namespace Snorlax.Database
     {
         private void Start()
         {
+            string str = "{\"$v20\":\"1.0:1.0\"}";
+            Debug.Log(str.Replace("\"", ""));
             using var db = DatabaseBridge.Open("ItemData");
             var col = db.GetCollection("skills");
 
@@ -19,34 +22,47 @@ namespace Snorlax.Database
                 var sword = new BsonDocument
                 {
                     ["_id"] = i + 1,
+                    ["boolen"] = true,
                     ["name"] = "Lightning Fall",
+                    ["vector2"] = Vector2.one.ParseToString(),
+                    ["vector2Int"] = Vector2Int.one.ParseToString(),
+                    ["vector3"] = Vector3.one.ParseToString(),
+                    ["vector3Int"] = Vector3Int.one.ParseToString(),
+                    ["vector4"] = Vector4.one.ParseToString(),
                     ["damage"] = Random.Range(40, 60),
                     ["mana"] = Random.Range(10, 30),
                     ["level"] = Random.Range(0, 5),
                     ["cooldown"] = Random.Range(10, 15),
                     ["position"] = new BsonArray(1, 2, 3),
+                    ["color"] = Color.red.ToHtmlStringRGBA(),
                     ["price"] = 30000000000,
                     ["dic"] = BsonMapper.Global.ToDocument(new Dictionary<string, int> {{"melle", 30}, {"range", 10}}),
                     ["date_create"] = DateTime.UtcNow.Date,
-                    ["date_purchase"] = new BsonArray(DateTime.UtcNow, new DateTime(1996, 4, 25, 7, 30, 0))
+                    ["date_purchase"] = new BsonArray(DateTime.UtcNow,
+                    new DateTime(1996,
+                        4,
+                        25,
+                        7,
+                        30,
+                        0))
                 };
-                
+
                 var result = col.FindOne(Query.EQ("_id", i + 1));
                 if (result == null) col.Insert(sword);
             }
- 
-          
+
+
             var col2 = db.GetCollection("items");
 
 
             for (int i = 0; i < 10; i++)
             {
-                var sword = new BsonDocument { ["_id"] = i + 1, ["name"] = "Sword", ["damage"] = Random.Range(5, 30), ["level"] = Random.Range(0, 5) };
+                var sword = new BsonDocument {["_id"] = i + 1, ["name"] = "Sword", ["damage"] = Random.Range(5, 30), ["level"] = Random.Range(0, 5)};
 
                 var result = col2.FindOne(Query.EQ("_id", i + 1));
                 if (result == null) col2.Insert(sword);
             }
-            
+
             var result22 = col.FindOne(Query.EQ("_id", 1));
             Debug.Log(result22["date_purchase"]);
             // var d = result22["date_create"].ToString();
