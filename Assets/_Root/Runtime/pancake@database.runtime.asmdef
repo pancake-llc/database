@@ -1,6 +1,6 @@
 {
     "name": "pancake@database.runtime",
-    "rootNamespace": "",
+    "rootNamespace": "Pancake.Database",
     "references": [
         "GUID:b7d258362c2b06342bf6220fba18596a"
     ],

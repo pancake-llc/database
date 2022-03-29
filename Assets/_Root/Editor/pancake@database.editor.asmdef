@@ -1,6 +1,6 @@
 {
     "name": "pancake@database.editor",
-    "rootNamespace": "",
+    "rootNamespace": "Pancake.DatabaseEditor",
     "references": [
         "GUID:686c6ddb7c263be4eb5ab9101c65cb91",
         "GUID:b7d258362c2b06342bf6220fba18596a",
@@ -15,12 +15,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [
-        {
-            "name": "com.unity.addressables",
-            "expression": "1.18.9",
-            "define": "SNORLAX_ADDRESSABLE"
-        }
-    ],
+    "versionDefines": [],
     "noEngineReferences": false
 }
