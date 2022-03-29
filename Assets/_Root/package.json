@@ -1,11 +1,11 @@
 {
-  "name": "com.snorlax.database",
+  "name": "com.pancake.database",
   "displayName": "Database",
   "description": "Provide friendly and useful edit or create game database for Unity 3D using NoSQL Document Store in a single data file",
   "version": "0.0.1",
   "unity": "2020.1",
   "author": {
-    "name": "Snorlax",
+    "name": "yenmoc",
     "email": "phongsoyenmoc.diep@gmail.com",
     "url": "https://github.com/yenmoc"
   },
@@ -15,10 +15,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:snorluxe/database.git",
-    "directory": "com.snorlax.database"
+    "url": "git@github.com:pancake-llc/database.git",
+    "directory": "com.pancake.database"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/@snorluxe"
+    "registry": "https://npm.pkg.github.com/@pancake"
   }
 }

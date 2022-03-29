@@ -551,7 +551,7 @@ namespace Pancake.DatabaseEditor
 
     public static class DatabaseWindowStatic
     {
-        [MenuItem("Tools/Snorlax/Show Database &_d")]
+        [MenuItem("Tools/Pancake/Show Database &_d")]
         public static DatabaseWindow Show()
         {
             var window = EditorWindow.GetWindow<DatabaseWindow>("Database", true);
