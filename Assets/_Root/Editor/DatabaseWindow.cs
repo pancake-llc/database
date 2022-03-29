@@ -10,9 +10,9 @@ using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
-namespace Snorlax.Database.Editor
+namespace Pancake.DatabaseEditor
 {
-    public class DatabaseEditor : EditorWindow
+    public class DatabaseWindow : EditorWindow
     {
         private LiteDatabase _db; // connect once database at a time
         private ConnectionString _connectionString; // connect string for open db
@@ -549,12 +549,12 @@ namespace Snorlax.Database.Editor
         }
     }
 
-    public static class DatabaseEditorStatic
+    public static class DatabaseWindowStatic
     {
         [MenuItem("Tools/Snorlax/Show Database &_d")]
-        public static DatabaseEditor Show()
+        public static DatabaseWindow Show()
         {
-            var window = EditorWindow.GetWindow<DatabaseEditor>("Database", true);
+            var window = EditorWindow.GetWindow<DatabaseWindow>("Database", true);
             window.maxSize = new Vector2(1200, 800);
             window.minSize = new Vector2(600, 400);
             if (window != null)

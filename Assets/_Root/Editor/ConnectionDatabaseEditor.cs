@@ -7,7 +7,7 @@ using Snorlax.Editor;
 using UnityEditor;
 using UnityEngine;
 
-namespace Snorlax.Database.Editor
+namespace Pancake.DatabaseEditor
 {
     public class ConnectionDatabaseEditor : EditorWindow
     {

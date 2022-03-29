@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Snorlax.Database.Editor
+namespace Pancake.DatabaseEditor
 {
     public class StringConverter
     {

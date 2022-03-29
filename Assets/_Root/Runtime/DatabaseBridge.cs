@@ -6,7 +6,7 @@ using MEC;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Snorlax.Database
+namespace Pancake.Database
 {
     public static class DatabaseBridge
     {

@@ -2,7 +2,7 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace Snorlax.Database.Editor
+namespace Pancake.DatabaseEditor
 {
     public static class R
     {

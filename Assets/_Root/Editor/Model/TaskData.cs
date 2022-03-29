@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using LiteDB;
 
-namespace Snorlax.Database.Editor
+namespace Pancake.DatabaseEditor
 {
     public class TaskData
     {

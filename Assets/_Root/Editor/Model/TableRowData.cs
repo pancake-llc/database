@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Snorlax.Database.Editor
+namespace Pancake.DatabaseEditor
 {
     [Serializable]
     public class TableRowData : ScriptableObject

@@ -5,7 +5,7 @@ using LiteDB;
 using Snorlax.Common;
 using UnityEngine;
 
-namespace Snorlax.Database.Editor
+namespace Pancake.DatabaseEditor
 {
     public abstract class TypeConverter<T>
     {

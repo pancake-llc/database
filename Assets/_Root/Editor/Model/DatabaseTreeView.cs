@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEditor.IMGUI.Controls;
 
-namespace Snorlax.Database.Editor
+namespace Pancake.DatabaseEditor
 {
     public class DatabaseTreeView : TreeView
     {

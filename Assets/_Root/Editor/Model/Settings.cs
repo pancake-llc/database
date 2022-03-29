@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using LiteDB;
 
-namespace Snorlax.Database.Editor
+namespace Pancake.DatabaseEditor
 {
     [Serializable]
     public class Settings

@@ -5,7 +5,7 @@ using Snorlax.Common;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Snorlax.Database
+namespace Pancake.Database
 {
     public class Demo : MonoBehaviour
     {

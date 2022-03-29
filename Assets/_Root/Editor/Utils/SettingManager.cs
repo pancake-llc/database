@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using LiteDB;
 
-namespace Snorlax.Database.Editor
+namespace Pancake.DatabaseEditor
 {
     public static class SettingManager
     {
