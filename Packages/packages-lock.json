@@ -1,11 +1,46 @@
 {
   "dependencies": {
+    "com.cysharp.ulid": {
+      "version": "https://github.com/pancake-llc/Ulid.git?path=src/Ulid.Unity/Assets/Scripts/Ulid#1.2.6",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "117664ab0fd3b0fe8108634b006321691218c4c9"
+    },
     "com.snorlax.common": {
       "version": "https://github.com/snorluxe/common.git?path=Assets/_Root#1.0.11",
       "depth": 0,
       "source": "git",
       "dependencies": {},
       "hash": "9718371dde329772afdaebdf25ef6d15daffab8f"
+    },
+    "com.system-community.systembuffers": {
+      "version": "https://github.com/system-community/SystemBuffers.git?path=Assets/_Root#4.4.0",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "9f2c7c68507e578f4840679d68b4728a9f7e7c7b"
+    },
+    "com.system-community.systemmemory": {
+      "version": "https://github.com/system-community/SystemMemory.git?path=Assets/_Root#4.5.4",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "54729a06c0c704784064014897c271e2882df92f"
+    },
+    "com.system-community.systemnumericsvectors": {
+      "version": "https://github.com/system-community/SystemNumericsVectors.git?path=Assets/_Root#4.4.0",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "68eec784b33da94f79afc13e37cfc87f80d55805"
+    },
+    "com.system-community.systemruntimecompilerservicesunsafe": {
+      "version": "https://github.com/system-community/SystemRuntimeCompilerServicesUnsafe.git?path=Assets/_Root#4.5.3",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "c9a633f2999d98b73fb9798fb7e4a411bc431147"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
