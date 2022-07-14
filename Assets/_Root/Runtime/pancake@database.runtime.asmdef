@@ -2,15 +2,14 @@
     "name": "pancake@database.runtime",
     "rootNamespace": "Pancake.Database",
     "references": [
-        "GUID:b7d258362c2b06342bf6220fba18596a"
+        "GUID:b7d258362c2b06342bf6220fba18596a",
+        "GUID:723bc6dc8b4852f4cbbe5633c04725cd"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
-    "precompiledReferences": [
-        "LiteDB.dll"
-    ],
+    "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],

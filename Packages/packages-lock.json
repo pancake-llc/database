@@ -1,39 +1,13 @@
 {
   "dependencies": {
-    "com.cysharp.ulid": {
-      "version": "https://github.com/pancake-llc/Ulid.git?path=src/Ulid.Unity/Assets/Scripts/Ulid#1.2.6",
+    "com.pancake.common": {
+      "version": "https://github.com/pancake-llc/common.git?path=Assets/_Root#1.2.9",
       "depth": 0,
       "source": "git",
-      "dependencies": {},
-      "hash": "117664ab0fd3b0fe8108634b006321691218c4c9"
-    },
-    "com.snorlax.common": {
-      "version": "https://github.com/snorluxe/common.git?path=Assets/_Root#1.0.11",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "9718371dde329772afdaebdf25ef6d15daffab8f"
-    },
-    "com.system-community.systembuffers": {
-      "version": "https://github.com/system-community/SystemBuffers.git?path=Assets/_Root#4.4.0",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "9f2c7c68507e578f4840679d68b4728a9f7e7c7b"
-    },
-    "com.system-community.systemmemory": {
-      "version": "https://github.com/system-community/SystemMemory.git?path=Assets/_Root#4.5.4",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "54729a06c0c704784064014897c271e2882df92f"
-    },
-    "com.system-community.systemnumericsvectors": {
-      "version": "https://github.com/system-community/SystemNumericsVectors.git?path=Assets/_Root#4.4.0",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "68eec784b33da94f79afc13e37cfc87f80d55805"
+      "dependencies": {
+        "com.unity.nuget.newtonsoft-json": "3.0.2"
+      },
+      "hash": "6378a3f2b98658182f498954062771466478d435"
     },
     "com.system-community.systemruntimecompilerservicesunsafe": {
       "version": "https://github.com/system-community/SystemRuntimeCompilerServicesUnsafe.git?path=Assets/_Root#4.5.3",
@@ -48,38 +22,24 @@
       "source": "builtin",
       "dependencies": {}
     },
-    "com.unity.addressables": {
-      "version": "1.18.19",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.scriptablebuildpipeline": "1.19.2",
-        "com.unity.modules.assetbundle": "1.0.0",
-        "com.unity.modules.imageconversion": "1.0.0",
-        "com.unity.modules.jsonserialize": "1.0.0",
-        "com.unity.modules.unitywebrequest": "1.0.0",
-        "com.unity.modules.unitywebrequestassetbundle": "1.0.0"
-      },
-      "url": "https://packages.unity.com"
-    },
     "com.unity.ext.nunit": {
       "version": "1.0.6",
-      "depth": 2,
+      "depth": 1,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.rider": {
-      "version": "2.0.7",
+      "version": "3.0.14",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.test-framework": "1.1.1"
+        "com.unity.ext.nunit": "1.0.6"
       },
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.12",
+      "version": "2.0.15",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -88,36 +48,27 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.vscode": {
-      "version": "1.2.4",
+      "version": "1.2.5",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
-    "com.unity.scriptablebuildpipeline": {
-      "version": "1.19.2",
+    "com.unity.nuget.newtonsoft-json": {
+      "version": "3.0.2",
       "depth": 1,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.test-framework": {
-      "version": "1.1.29",
+      "version": "1.1.31",
       "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.ext.nunit": "1.0.6",
         "com.unity.modules.imgui": "1.0.0",
         "com.unity.modules.jsonserialize": "1.0.0"
-      },
-      "url": "https://packages.unity.com"
-    },
-    "com.unity.textmeshpro": {
-      "version": "3.0.6",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.ugui": "1.0.0"
       },
       "url": "https://packages.unity.com"
     },
