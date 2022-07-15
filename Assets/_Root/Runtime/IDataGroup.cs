@@ -9,7 +9,7 @@ namespace Pancake.Database
         public Type Type { get; set; }
         public List<DataEntity> Content { get; set; }
         public void Add(DataEntity entity);
-        public void Remove(int key);
+        public void Remove(string key);
         public void CleanUp();
     }
 }

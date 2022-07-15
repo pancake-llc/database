@@ -16,7 +16,7 @@ namespace Pancake.Database
 
         public void Add(DataEntity entity) { Content.Add(entity); }
 
-        public void Remove(int key)
+        public void Remove(string key)
         {
             for (int i = 0; i < Content.Count; i++)
             {

@@ -27,7 +27,7 @@ namespace Pancake.Database
             EditorHandleDirty();
         }
 
-        public void Remove(int key)
+        public void Remove(string key)
         {
             for (int i = 0; i < Content.Count; i++)
             {
