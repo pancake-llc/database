@@ -1,16 +1,16 @@
-using Pancake.Database;
-using UnityEditor;
-using UnityEngine;
-
-namespace Pancake.Editor
+﻿namespace Pancake.Database
 {
+    using UnityEngine;
+    using UnityEditor;
+
     [CustomPropertyDrawer(typeof(SpritePreviewAttribute))]
-    public class SpritePreviewDrawer : PropertyDrawer
+    public class SpritePropertyDrawer : PropertyDrawer
     {
         private const float SIZE = 70;
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+
+        public override float GetPropertyHeight(SerializedProperty p, GUIContent label)
         {
-            return property.objectReferenceValue != null ? SIZE : base.GetPropertyHeight(property, label);
+            return p.objectReferenceValue != null ? SIZE : base.GetPropertyHeight(p, label);
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -31,9 +31,8 @@ namespace Pancake.Editor
                 GUI.Label(position, property.displayName);
                 EditorGUI.PropertyField(position, property, true);
             }
-            
-            EditorGUI.EndProperty();
 
+            EditorGUI.EndProperty();
         }
     }
 }

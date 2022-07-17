@@ -4,30 +4,30 @@ using UnityEngine;
 
 namespace Pancake.Database
 {
-    [Serializable]
-    public class DatabaseCustomGroup : DataEntity, IDataGroup
+    // ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
+    public class CustomGroup : Entity, IGroup
     {
-        [SerializeField] private List<DataEntity> datas = new List<DataEntity>();
-        [SerializeField, HideInInspector] private string typeName = typeof(DataEntity).AssemblyQualifiedName;
-
         public Type Type { get => Type.GetType(typeName); set => typeName = value.AssemblyQualifiedName; }
-        public List<DataEntity> Content { get => datas; set => datas = value; }
+        [SerializeField] [HideInInspector] private string typeName = typeof(Entity).AssemblyQualifiedName;
+
+        public List<Entity> Content { get => datas; set => datas = value; }
+        [SerializeField] private List<Entity> datas = new List<Entity>();
 
         protected override void Reset()
         {
             base.Reset();
-            Title = "New Database Custom Group";
+            Title = "Custom Group";
             Description = "Used to store a list of custom Data Entity types for easy reference.";
         }
 
-        public void Add(DataEntity entity)
+        public virtual void Add(Entity entity)
         {
             if (Content.Contains(entity)) return;
             Content.Add(entity);
             EditorHandleDirty();
         }
 
-        public void Remove(string key)
+        public virtual void Remove(string key)
         {
             for (int i = 0; i < Content.Count; i++)
             {
@@ -40,7 +40,7 @@ namespace Pancake.Database
             EditorHandleDirty();
         }
 
-        public void CleanUp() { Content.RemoveAll(x => x == null); }
+        public virtual void CleanUp() { Content.RemoveAll(x => x == null); }
 
         protected virtual void EditorHandleDirty()
         {

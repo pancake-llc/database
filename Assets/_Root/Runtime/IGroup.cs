@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace Pancake.Database
 {
-    public interface IDataGroup
+    public interface IGroup
     {
         public string Title { get; set; }
         public Type Type { get; set; }
-        public List<DataEntity> Content { get; set; }
-        public void Add(DataEntity entity);
+        public List<Entity> Content { get; set; }
+        public void Add(Entity entity);
         public void Remove(string key);
         public void CleanUp();
     }

@@ -1,6 +1,6 @@
 using UnityEngine.UIElements;
 
-namespace Pancake.Editor
+namespace Pancake.Database
 {
     public class SplitView : TwoPaneSplitView
         {
