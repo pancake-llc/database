@@ -31,7 +31,7 @@ namespace Pancake.Database
             };
 
             Dashboard.onCurrentAssetChanged += Rebuild;
-            Dashboard.onDeleteAssetStart += InspectNothing;
+            Dashboard.onDeleteEntityStart += InspectNothing;
 
             this.name = "Inspector";
             this.viewDataKey = "inspector";

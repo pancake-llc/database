@@ -70,7 +70,7 @@ namespace Pancake.Database
             if (type.IsAbstract) GUI.enabled = false;
             if (GUI.Button(right1New, "New"))
             {
-                MakeNew(Dashboard.CreateNewAsset(type));
+                MakeNew(Dashboard.CreateNewEntity(type));
             }
 
             GUI.enabled = true;

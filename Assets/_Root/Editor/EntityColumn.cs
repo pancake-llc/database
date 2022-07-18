@@ -238,7 +238,7 @@ namespace Pancake.Database
         /// </summary>
         /// <param name="t">Type to create. Must derive from Entity.</param>
         /// <returns>The newly created asset object</returns>
-        public Entity NewAsset(Type t)
+        public Entity Create(Type t)
         {
             if (t == null)
             {

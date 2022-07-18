@@ -97,13 +97,13 @@ namespace Pancake.Database
         public static Action onSearchAssets;
         public static Action onSearchGroups;
 
-        // assets
-        public static Action onDeleteAssetStart;
-        public static Action onDeleteAssetComplete;
-        public static Action onCreateNewAssetStart;
-        public static Action onCreateNewAssetComplete;
-        public static Action onCloneAssetStart;
-        public static Action onCloneAssetComplete;
+        // entity
+        public static Action onDeleteEntityStart;
+        public static Action onDeleteEntityComplete;
+        public static Action onCreateNewEntityStart;
+        public static Action onCreateNewEntityComplete;
+        public static Action onCloneEntityStart;
+        public static Action onCloneEntityComplete;
 
         // groups
         public static Action onCreateGroupStart;
@@ -130,7 +130,6 @@ namespace Pancake.Database
         [MenuItem("Tools/Pancake/DB/Dashboard %#d", priority = 0)]
         public static void Open()
         {
-            //Debug.Log("Open()");
             if (instance != null)
             {
                 FocusWindowIfItsOpen(typeof(Dashboard));
@@ -138,10 +137,11 @@ namespace Pancake.Database
             }
 
             instance = GetWindow<Dashboard>();
-            instance.titleContent.text = "Data Dashboard";
+            instance.titleContent.text = "Dashboard";
             instance.minSize = new Vector2(850, 200);
             instance.Show();
             instance.RebuildFull();
+            Builder.Reload();
         }
 
         public void OnEnable() { instance = this; }
@@ -199,9 +199,9 @@ namespace Pancake.Database
             entityBtnClone = entity.Q<ToolbarButton>("entity_btn_clone");
             entityBtnRemoveFromGroup = entity.Q<ToolbarButton>("entity_btn_remove_from_group");
 
-            entityBtnNew.clicked += CreateNewAssetCallback;
-            entityBtnDel.clicked += DeleteSelectedAsset;
-            entityBtnClone.clicked += CloneSelectedAsset;
+            entityBtnNew.clicked += CreateNewEntityCallback;
+            entityBtnDel.clicked += DeleteSelectedEntity;
+            entityBtnClone.clicked += CloneSelectedEntity;
             entityBtnRemoveFromGroup.clicked += RemoveAssetFromGroup;
 
 
@@ -219,7 +219,6 @@ namespace Pancake.Database
 
         public void RebuildFull()
         {
-            //Debug.Log($"Start RebuildFull() - Dashboard is {(Instance == null ? "null" : "valid")}");
             if (instance == null) return;
 
             instance.LoadUxmlTemplate();
@@ -241,7 +240,7 @@ namespace Pancake.Database
             RebuildInspectorColumn(fullRebuild);
             SetCurrentGroup(CurrentSelectedGroup);
 
-            onCreateNewAssetComplete += OnCreatedNewAsset;
+            onCreateNewEntityComplete += OnCreatedNewAsset;
         }
 
         private void RebuildGroupColumn(bool fullRebuild = false)
@@ -322,7 +321,7 @@ namespace Pancake.Database
         /// <summary>
         /// The Dashboard button calls this to create a new asset in the current group.
         /// </summary>
-        private static void CreateNewAssetCallback()
+        private static void CreateNewEntityCallback()
         {
             if (CurrentSelectedGroup.Type.IsAbstract)
             {
@@ -332,21 +331,21 @@ namespace Pancake.Database
                 if (confirm) return;
             }
 
-            CreateNewAsset();
+            CreateNewEntity();
         }
 
         /// <summary>
         /// Create a new asset with the current group Type.
         /// </summary>
         /// <returns></returns>
-        public static Entity CreateNewAsset()
+        public static Entity CreateNewEntity()
         {
-            onCreateNewAssetStart?.Invoke();
+            onCreateNewEntityStart?.Invoke();
 
-            Entity newAsset = enityColumn.NewAsset(CurrentSelectedGroup.Type);
+            Entity newEntity = enityColumn.Create(CurrentSelectedGroup.Type);
 
-            onCreateNewAssetComplete?.Invoke();
-            return newAsset;
+            onCreateNewEntityComplete?.Invoke();
+            return newEntity;
         }
 
         /// <summary>
@@ -354,27 +353,27 @@ namespace Pancake.Database
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        public static Entity CreateNewAsset(Type t)
+        public static Entity CreateNewEntity(Type t)
         {
             Debug.Log($"Create new asset with specific Type: {t.Name}");
-            onCreateNewAssetStart?.Invoke();
-            Entity newAsset = enityColumn.NewAsset(t);
-            onCreateNewAssetComplete?.Invoke();
+            onCreateNewEntityStart?.Invoke();
+            Entity newAsset = enityColumn.Create(t);
+            onCreateNewEntityComplete?.Invoke();
             return newAsset;
         }
 
-        public static void CloneSelectedAsset()
+        public static void CloneSelectedEntity()
         {
-            onCloneAssetStart?.Invoke();
+            onCloneEntityStart?.Invoke();
             enityColumn.CloneSelection();
-            onCloneAssetComplete?.Invoke();
+            onCloneEntityComplete?.Invoke();
         }
 
-        public static void DeleteSelectedAsset()
+        public static void DeleteSelectedEntity()
         {
-            onDeleteAssetStart?.Invoke();
+            onDeleteEntityStart?.Invoke();
             enityColumn.DeleteSelection();
-            onDeleteAssetComplete?.Invoke();
+            onDeleteEntityComplete?.Invoke();
         }
 
         private static void OnCreatedNewAsset() { Builder.Reload(); }
@@ -408,7 +407,7 @@ namespace Pancake.Database
         public static CustomGroup CreateNewDataGroup()
         {
             onCreateGroupStart?.Invoke();
-            CustomGroup result = (CustomGroup) enityColumn.NewAsset(typeof(CustomGroup));
+            CustomGroup result = (CustomGroup) enityColumn.Create(typeof(CustomGroup));
             groupColumn.Rebuild();
             InspectAssetRemote(result, typeof(CustomGroup));
             onCreateGroupComplete?.Invoke();
