@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -50,11 +49,7 @@ namespace Pancake.Database
 
                 string currentName = EditorSettings.Get(EditorSettings.ESettingKey.CurrentGroupName);
                 GroupFoldableButton button = groupColumn.Q<GroupFoldableButton>(currentName);
-                if (button == null)
-                {
-                    // Debug.Log($"Failed to find a group button '{currentName}'.");
-                    return null;
-                }
+                if (button == null) return null;
 
                 IGroup asset = button.Group;
                 if (asset == null)
@@ -92,24 +87,24 @@ namespace Pancake.Database
         // action callbacks ////////////////
 
         // major changers
-        public static event Action OnCurrentEntityChanged;
-        public static event Action OnCurrentGroupChanged;
+        public static Action onCurrentEntityChanged;
+        public static Action onCurrentGroupChanged;
 
         // searches
-        public static event Action OnSearchEntity;
-        public static event Action OnSearchGroups;
+        public static Action onSearchEntity;
+        public static Action onSearchGroups;
 
         // entity
-        public static event Action OnDeleteEntityStart;
-        public static event Action OnDeleteEntityComplete;
-        public static event Action OnCreateNewEntityStart;
-        public static event Action OnCreateNewEntityComplete;
-        public static event Action OnCloneEntityStart;
-        public static event Action OnCloneEntityComplete;
+        public static Action onDeleteEntityStart;
+        public static Action onDeleteEntityComplete;
+        public static Action onCreateNewEntityStart;
+        public static Action onCreateNewEntityComplete;
+        public static Action onCloneEntityStart;
+        public static Action onCloneEntityComplete;
 
         // groups
-        public static event Action OnCreateGroupStart;
-        public static event Action OnCreateGroupComplete;
+        public static Action onCreateGroupStart;
+        public static Action onCreateGroupComplete;
 
         // wrappers for views
         protected static VisualElement groupView;
@@ -153,14 +148,14 @@ namespace Pancake.Database
             {
                 enitySearchCache = entitySearch.value;
                 EditorSettings.Set(EditorSettings.ESettingKey.SearchEntities, enitySearchCache);
-                OnSearchEntity?.Invoke();
+                onSearchEntity?.Invoke();
             }
 
             if (SearchTypeIsDirty)
             {
                 groupSearchCache = groupSearch.value;
                 EditorSettings.Set(EditorSettings.ESettingKey.SearchGroups, groupSearchCache);
-                OnSearchGroups?.Invoke();
+                onSearchGroups?.Invoke();
             }
         }
 
@@ -239,26 +234,7 @@ namespace Pancake.Database
             RebuildInspectorColumn(fullRebuild);
             SetCurrentGroup(CurrentSelectedGroup);
 
-            OnCreateNewEntityComplete -= CreatedNewEntityCallback;
-            OnCreateNewEntityComplete += CreatedNewEntityCallback;
-        }
-
-        internal void RebuildAfterCreateEntity()
-        {
-            if (instance == null) return;
-            instance.LoadUxmlTemplate();
-
-            entitySearch.SetValueWithoutNotify(EditorSettings.Get(EditorSettings.ESettingKey.SearchEntities));
-            enitySearchCache = entitySearch.value;
-            RebuildAssetColumn(true);
-            RebuildInspectorColumn(true);
-
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Reset();
-            stopwatch.Restart();
-            SetCurrentGroup(CurrentSelectedGroup);
-            stopwatch.Stop();
-            Debug.Log("TIME :" + stopwatch.ElapsedMilliseconds);
+            onCreateNewEntityComplete = CreatedNewEntityCallback;
         }
 
         private void RebuildGroupColumn(bool fullRebuild = false)
@@ -307,13 +283,13 @@ namespace Pancake.Database
             CurrentSelectedGroup = group;
             groupColumn.SelectButtonByTitle(group.Title);
             entitySearch.value = string.Empty;
-            OnCurrentGroupChanged?.Invoke();
+            onCurrentGroupChanged?.Invoke();
         }
 
         public static void SetCurrentInspectorAsset(Entity asset)
         {
             CurrentSelectedEntity = asset;
-            OnCurrentEntityChanged?.Invoke();
+            onCurrentEntityChanged?.Invoke();
         }
 
         public static void InspectAssetRemote(Object asset, Type t)
@@ -358,9 +334,9 @@ namespace Pancake.Database
         /// <returns></returns>
         public static Entity CreateNewEntity()
         {
-            OnCreateNewEntityStart?.Invoke();
+            onCreateNewEntityStart?.Invoke();
             var e = enityColumn.Create(CurrentSelectedGroup.Type);
-            OnCreateNewEntityComplete?.Invoke();
+            onCreateNewEntityComplete?.Invoke();
             return e;
         }
 
@@ -371,7 +347,7 @@ namespace Pancake.Database
         /// <returns></returns>
         public static Entity CreateNewEntity(Type t)
         {
-            OnCreateNewEntityStart?.Invoke();
+            onCreateNewEntityStart?.Invoke();
             Entity newAsset = enityColumn.Create(t);
             //OnCreateNewEntityComplete?.Invoke();
             return newAsset;
@@ -379,19 +355,19 @@ namespace Pancake.Database
 
         public static void CloneSelectedEntity()
         {
-            OnCloneEntityStart?.Invoke();
+            onCloneEntityStart?.Invoke();
             enityColumn.CloneSelection();
-            OnCloneEntityComplete?.Invoke();
+            onCloneEntityComplete?.Invoke();
         }
 
         public static void DeleteSelectedEntity()
         {
-            OnDeleteEntityStart?.Invoke();
+            onDeleteEntityStart?.Invoke();
             enityColumn.DeleteSelection();
-            OnDeleteEntityComplete?.Invoke();
+            onDeleteEntityComplete?.Invoke();
         }
 
-        private static void CreatedNewEntityCallback() { Builder.ReloadAfterCreateEntity(); }
+        private static void CreatedNewEntityCallback() { Builder.Reload(); }
 
         public static void RemoveAssetFromGroup()
         {
@@ -421,11 +397,11 @@ namespace Pancake.Database
 
         public static CustomGroup CreateNewDataGroup()
         {
-            OnCreateGroupStart?.Invoke();
+            onCreateGroupStart?.Invoke();
             CustomGroup result = (CustomGroup) enityColumn.Create(typeof(CustomGroup));
             groupColumn.Rebuild();
             InspectAssetRemote(result, typeof(CustomGroup));
-            OnCreateGroupComplete?.Invoke();
+            onCreateGroupComplete?.Invoke();
             return null;
         }
 

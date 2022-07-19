@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
@@ -30,10 +29,9 @@ namespace Pancake.Database
                 }
             };
 
-            Dashboard.OnCurrentEntityChanged -= Rebuild;
-            Dashboard.OnCurrentEntityChanged += Rebuild;
-            Dashboard.OnDeleteEntityStart -= InspectNothing;
-            Dashboard.OnDeleteEntityStart += InspectNothing;
+            Dashboard.onCurrentEntityChanged -= Rebuild;
+            Dashboard.onCurrentEntityChanged += Rebuild;
+            Dashboard.onDeleteEntityStart = InspectNothing;
 
             this.name = "Inspector";
             this.viewDataKey = "inspector";

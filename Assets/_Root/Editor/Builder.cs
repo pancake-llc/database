@@ -55,15 +55,6 @@ namespace Pancake.Database
             if (Dashboard.instance != null) Dashboard.instance.RebuildFull();
         }
 
-        internal static void ReloadAfterCreateEntity()
-        {
-            FindDataEntities();
-            UnityEditor.EditorUtility.SetDirty(Data.Database);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            if (Dashboard.instance != null) Dashboard.instance.RebuildAfterCreateEntity();
-        }
-
         private static void FindStaticGroups()
         {
             Data.Database.ClearStaticGroups();

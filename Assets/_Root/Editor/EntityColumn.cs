@@ -46,10 +46,8 @@ namespace Pancake.Database
             ListElement.onItemChosen += ChooseAssetInternal;
 #endif
             // plug into events for updates.
-            Dashboard.OnSearchEntity -= CallbackListBySearch;
-            Dashboard.OnSearchEntity += CallbackListBySearch;
-            Dashboard.OnCurrentGroupChanged -= CallbackListByType;
-            Dashboard.OnCurrentGroupChanged += CallbackListByType;
+            Dashboard.onSearchEntity = CallbackListBySearch;
+            Dashboard.onCurrentGroupChanged = CallbackListByType;
 
             Add(listElement);
             ListAssetsByGroup();
@@ -67,11 +65,7 @@ namespace Pancake.Database
 
         private void CallbackListBySearch() { ListAssetsBySearch(true); }
 
-        private void CallbackListByType()
-        {
-            Debug.Log("HAHHA");
-            ListAssetsByGroup(true);
-        }
+        private void CallbackListByType() { ListAssetsByGroup(true); }
 
         public void ListAssetsByGroup(bool scrollToTop = false)
         {
@@ -160,7 +154,7 @@ namespace Pancake.Database
         private void SelectAssetsInternal(IEnumerable<object> input)
         {
             var objs = (List<object>) input;
-#else                   
+#else
         private void SelectAssetsInternal(List<object> objs)
         {
 #endif
@@ -225,9 +219,16 @@ namespace Pancake.Database
             };
 
             //selectableItem.Add(new Label {name = "Prefix", text = "error", style = {unityFontStyleAndWeight = FontStyle.Bold}});
-            var icon = new Image {style = {flexGrow = 0, flexShrink = 0, paddingLeft = 5, height = 32,
-                width = 32
-            },
+            var icon = new Image
+            {
+                style =
+                {
+                    flexGrow = 0,
+                    flexShrink = 0,
+                    paddingLeft = 5,
+                    height = 32,
+                    width = 32
+                },
                 scaleMode = ScaleMode.ScaleAndCrop
             };
 
