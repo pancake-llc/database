@@ -46,8 +46,10 @@ namespace Pancake.Database
             ListElement.onItemChosen += ChooseAssetInternal;
 #endif
             // plug into events for updates.
-            Dashboard.onSearchAssets += CallbackListBySearch;
-            Dashboard.onCurrentGroupChanged += CallbackListByType;
+            Dashboard.OnSearchEntity -= CallbackListBySearch;
+            Dashboard.OnSearchEntity += CallbackListBySearch;
+            Dashboard.OnCurrentGroupChanged -= CallbackListByType;
+            Dashboard.OnCurrentGroupChanged += CallbackListByType;
 
             Add(listElement);
             ListAssetsByGroup();
@@ -64,7 +66,12 @@ namespace Pancake.Database
         }
 
         private void CallbackListBySearch() { ListAssetsBySearch(true); }
-        private void CallbackListByType() { ListAssetsByGroup(true); }
+
+        private void CallbackListByType()
+        {
+            Debug.Log("HAHHA");
+            ListAssetsByGroup(true);
+        }
 
         public void ListAssetsByGroup(bool scrollToTop = false)
         {
@@ -153,7 +160,7 @@ namespace Pancake.Database
         private void SelectAssetsInternal(IEnumerable<object> input)
         {
             var objs = (List<object>) input;
-#else
+#else                   
         private void SelectAssetsInternal(List<object> objs)
         {
 #endif

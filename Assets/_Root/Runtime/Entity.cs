@@ -18,7 +18,7 @@ namespace Pancake.Database
 
         protected virtual void Reset()
         {
-            Title = $"UNASSIGNED.{DateTime.Now.TimeOfDay.TotalMilliseconds}";
+            Title = $"UNASSIGNED.{Ulid.NewUlid()}";
             Description = "";
         }
 

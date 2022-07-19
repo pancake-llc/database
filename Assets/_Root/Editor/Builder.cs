@@ -7,6 +7,7 @@ using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditor.Callbacks;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Pancake.Database
 {
@@ -42,7 +43,6 @@ namespace Pancake.Database
         /// <summary>
         /// Rebuild lists of static groups, custom groups, and all data entities.
         /// </summary>
-        [MenuItem("Tools/Pancake/DB/DB Soft Reload", priority = 10)]
         public static void Reload()
         {
             FindDataEntities();
@@ -53,6 +53,15 @@ namespace Pancake.Database
             AssetDatabase.Refresh();
 
             if (Dashboard.instance != null) Dashboard.instance.RebuildFull();
+        }
+
+        internal static void ReloadAfterCreateEntity()
+        {
+            FindDataEntities();
+            UnityEditor.EditorUtility.SetDirty(Data.Database);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            if (Dashboard.instance != null) Dashboard.instance.RebuildAfterCreateEntity();
         }
 
         private static void FindStaticGroups()
@@ -95,7 +104,7 @@ namespace Pancake.Database
             var result = new List<StaticGroup>();
 
             // ** ASSEMBLY LEVEL
-            var groups = assembly.GetExportedTypes().Where(t => t.IsSubclassOf(typeof(Entity)) && t != typeof(CustomGroup)).GroupBy(t => t.Namespace);
+            var groups = assembly.GetExportedTypes().Where(t => t.IsSubclassOf(typeof(Entity)) || t == typeof(Entity)).GroupBy(t => t.Namespace);
 
             // Find all of the valid types and make group instances for them.
             // ** NAMESPACE LEVEL
@@ -153,7 +162,7 @@ namespace Pancake.Database
             UnityEditor.EditorUtility.SetDirty(Data.Database);
         }
 
-        [MenuItem("Tools/Pancake/DB/Data Key Upgrader (safe)", priority = 100)]
+        //[MenuItem("Tools/Pancake/DB/Data Key Upgrader (safe)", priority = 100)]
         public static void DataUpgrader()
         {
             bool proceed = UnityEditor.EditorUtility.DisplayDialog("Upgrade Data",
@@ -182,7 +191,7 @@ namespace Pancake.Database
             UnityEditor.EditorUtility.DisplayDialog("Complete", $"Changed {changed} entity keys.", "Ok");
         }
 
-        [MenuItem("Tools/Pancake/DB/Data Key Reset (danger)", priority = 100)]
+        //[MenuItem("Tools/Pancake/DB/Data Key Reset (danger)", priority = 100)]
         public static void DataReset()
         {
             bool proceed = UnityEditor.EditorUtility.DisplayDialog("Reset Data Keys",
@@ -214,7 +223,7 @@ namespace Pancake.Database
         /// <summary>
         /// Forces a refresh of assets serialization.
         /// </summary>
-        [MenuItem("Tools/Pancake/DB/Reimport Assets - By Type (safe)", priority = 100)]
+        //[MenuItem("Tools/Pancake/DB/Reimport Assets - By Type (safe)", priority = 100)]
         public static void ReimportAllByType()
         {
             bool confirm = UnityEditor.EditorUtility.DisplayDialog("Reimport Data Asset Files",
@@ -251,7 +260,7 @@ namespace Pancake.Database
         /// <summary>
         /// Forces a refresh of assets serialization.
         /// </summary>
-        [MenuItem("Tools/Pancake/DB/Reimport Assets - By Name (safe)", priority = 100)]
+        //[MenuItem("Tools/Pancake/DB/Reimport Assets - By Name (safe)", priority = 100)]
         public static void ReimportAllByName()
         {
             bool confirm = UnityEditor.EditorUtility.DisplayDialog("Reimport Data Asset Files",
@@ -285,7 +294,7 @@ namespace Pancake.Database
             }
         }
 
-        [MenuItem("Tools/Pancake/DB/Cleanup Data (semi-safe)", priority = 100)]
+        //[MenuItem("Tools/Pancake/DB/Cleanup Data (semi-safe)", priority = 100)]
         public static void CleanupStorageFolder()
         {
             bool confirm = UnityEditor.EditorUtility.DisplayDialog("Cleanup Data",

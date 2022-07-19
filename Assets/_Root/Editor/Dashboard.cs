@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
 namespace Pancake.Database
@@ -90,24 +92,24 @@ namespace Pancake.Database
         // action callbacks ////////////////
 
         // major changers
-        public static Action onCurrentAssetChanged;
-        public static Action onCurrentGroupChanged;
+        public static event Action OnCurrentEntityChanged;
+        public static event Action OnCurrentGroupChanged;
 
         // searches
-        public static Action onSearchAssets;
-        public static Action onSearchGroups;
+        public static event Action OnSearchEntity;
+        public static event Action OnSearchGroups;
 
         // entity
-        public static Action onDeleteEntityStart;
-        public static Action onDeleteEntityComplete;
-        public static Action onCreateNewEntityStart;
-        public static Action onCreateNewEntityComplete;
-        public static Action onCloneEntityStart;
-        public static Action onCloneEntityComplete;
+        public static event Action OnDeleteEntityStart;
+        public static event Action OnDeleteEntityComplete;
+        public static event Action OnCreateNewEntityStart;
+        public static event Action OnCreateNewEntityComplete;
+        public static event Action OnCloneEntityStart;
+        public static event Action OnCloneEntityComplete;
 
         // groups
-        public static Action onCreateGroupStart;
-        public static Action onCreateGroupComplete;
+        public static event Action OnCreateGroupStart;
+        public static event Action OnCreateGroupComplete;
 
         // wrappers for views
         protected static VisualElement groupView;
@@ -127,7 +129,7 @@ namespace Pancake.Database
         private static readonly StyleColor ButtonInactive = new StyleColor(Color.gray);
         private static readonly StyleColor ButtonActive = new StyleColor(Color.white);
 
-        [MenuItem("Tools/Pancake/DB/Dashboard %#d", priority = 0)]
+        [MenuItem("Tools/Pancake/Database Dashboard %#d", priority = 0)]
         public static void Open()
         {
             if (instance != null)
@@ -140,7 +142,6 @@ namespace Pancake.Database
             instance.titleContent.text = "Dashboard";
             instance.minSize = new Vector2(850, 200);
             instance.Show();
-            instance.RebuildFull();
             Builder.Reload();
         }
 
@@ -152,14 +153,14 @@ namespace Pancake.Database
             {
                 enitySearchCache = entitySearch.value;
                 EditorSettings.Set(EditorSettings.ESettingKey.SearchEntities, enitySearchCache);
-                onSearchAssets?.Invoke();
+                OnSearchEntity?.Invoke();
             }
 
             if (SearchTypeIsDirty)
             {
                 groupSearchCache = groupSearch.value;
                 EditorSettings.Set(EditorSettings.ESettingKey.SearchGroups, groupSearchCache);
-                onSearchGroups?.Invoke();
+                OnSearchGroups?.Invoke();
             }
         }
 
@@ -220,14 +221,12 @@ namespace Pancake.Database
         public void RebuildFull()
         {
             if (instance == null) return;
-
             instance.LoadUxmlTemplate();
             Rebuild(true);
         }
 
         public void Rebuild(bool fullRebuild = false)
         {
-            //Debug.Log($"... Rebuild()");
             // search data
             groupSearch.SetValueWithoutNotify(EditorSettings.Get(EditorSettings.ESettingKey.SearchGroups));
             entitySearch.SetValueWithoutNotify(EditorSettings.Get(EditorSettings.ESettingKey.SearchEntities));
@@ -240,7 +239,26 @@ namespace Pancake.Database
             RebuildInspectorColumn(fullRebuild);
             SetCurrentGroup(CurrentSelectedGroup);
 
-            onCreateNewEntityComplete += OnCreatedNewAsset;
+            OnCreateNewEntityComplete -= CreatedNewEntityCallback;
+            OnCreateNewEntityComplete += CreatedNewEntityCallback;
+        }
+
+        internal void RebuildAfterCreateEntity()
+        {
+            if (instance == null) return;
+            instance.LoadUxmlTemplate();
+
+            entitySearch.SetValueWithoutNotify(EditorSettings.Get(EditorSettings.ESettingKey.SearchEntities));
+            enitySearchCache = entitySearch.value;
+            RebuildAssetColumn(true);
+            RebuildInspectorColumn(true);
+
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Reset();
+            stopwatch.Restart();
+            SetCurrentGroup(CurrentSelectedGroup);
+            stopwatch.Stop();
+            Debug.Log("TIME :" + stopwatch.ElapsedMilliseconds);
         }
 
         private void RebuildGroupColumn(bool fullRebuild = false)
@@ -289,13 +307,13 @@ namespace Pancake.Database
             CurrentSelectedGroup = group;
             groupColumn.SelectButtonByTitle(group.Title);
             entitySearch.value = string.Empty;
-            onCurrentGroupChanged?.Invoke();
+            OnCurrentGroupChanged?.Invoke();
         }
 
         public static void SetCurrentInspectorAsset(Entity asset)
         {
             CurrentSelectedEntity = asset;
-            onCurrentAssetChanged?.Invoke();
+            OnCurrentEntityChanged?.Invoke();
         }
 
         public static void InspectAssetRemote(Object asset, Type t)
@@ -340,12 +358,10 @@ namespace Pancake.Database
         /// <returns></returns>
         public static Entity CreateNewEntity()
         {
-            onCreateNewEntityStart?.Invoke();
-
-            Entity newEntity = enityColumn.Create(CurrentSelectedGroup.Type);
-
-            onCreateNewEntityComplete?.Invoke();
-            return newEntity;
+            OnCreateNewEntityStart?.Invoke();
+            var e = enityColumn.Create(CurrentSelectedGroup.Type);
+            OnCreateNewEntityComplete?.Invoke();
+            return e;
         }
 
         /// <summary>
@@ -355,28 +371,27 @@ namespace Pancake.Database
         /// <returns></returns>
         public static Entity CreateNewEntity(Type t)
         {
-            Debug.Log($"Create new asset with specific Type: {t.Name}");
-            onCreateNewEntityStart?.Invoke();
+            OnCreateNewEntityStart?.Invoke();
             Entity newAsset = enityColumn.Create(t);
-            onCreateNewEntityComplete?.Invoke();
+            //OnCreateNewEntityComplete?.Invoke();
             return newAsset;
         }
 
         public static void CloneSelectedEntity()
         {
-            onCloneEntityStart?.Invoke();
+            OnCloneEntityStart?.Invoke();
             enityColumn.CloneSelection();
-            onCloneEntityComplete?.Invoke();
+            OnCloneEntityComplete?.Invoke();
         }
 
         public static void DeleteSelectedEntity()
         {
-            onDeleteEntityStart?.Invoke();
+            OnDeleteEntityStart?.Invoke();
             enityColumn.DeleteSelection();
-            onDeleteEntityComplete?.Invoke();
+            OnDeleteEntityComplete?.Invoke();
         }
 
-        private static void OnCreatedNewAsset() { Builder.Reload(); }
+        private static void CreatedNewEntityCallback() { Builder.ReloadAfterCreateEntity(); }
 
         public static void RemoveAssetFromGroup()
         {
@@ -406,11 +421,11 @@ namespace Pancake.Database
 
         public static CustomGroup CreateNewDataGroup()
         {
-            onCreateGroupStart?.Invoke();
+            OnCreateGroupStart?.Invoke();
             CustomGroup result = (CustomGroup) enityColumn.Create(typeof(CustomGroup));
             groupColumn.Rebuild();
             InspectAssetRemote(result, typeof(CustomGroup));
-            onCreateGroupComplete?.Invoke();
+            OnCreateGroupComplete?.Invoke();
             return null;
         }
 

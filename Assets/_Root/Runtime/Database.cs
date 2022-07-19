@@ -58,7 +58,7 @@ namespace Pancake.Database
         /// <returns>A list of all DataEntities in the database that can successfully cast to T</returns>
         public List<T> Query<T>() { return values.OfType<T>().ToList().Map(x => (T) Convert.ChangeType(x, typeof(T))); }
 
-        /// <summary>
+        /// <summary>                                                                                                                                                       
         /// Add an item to the Database. Using this at runtime is not really useful since it doesn't persist between sessions, but maybe so if you are hotloading in custom content at runtime every session.
         /// </summary>
         /// <param name="data">The data reference.</param>

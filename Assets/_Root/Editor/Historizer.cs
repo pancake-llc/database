@@ -29,7 +29,8 @@ namespace Pancake.Database
             style.flexGrow = 1;
             style.flexDirection = new StyleEnum<FlexDirection>(FlexDirection.Row);
 
-            Dashboard.onCurrentAssetChanged += AddAndHistorize;
+            Dashboard.OnCurrentEntityChanged -= AddAndHistorize;
+            Dashboard.OnCurrentEntityChanged += AddAndHistorize;
             
             RestoreHistory();
             BuildBreadcrumbs();

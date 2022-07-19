@@ -39,7 +39,8 @@ namespace Pancake.Database
 
             if (!isSubscribed)
             {
-                Dashboard.onSearchGroups += FilterBySearchBar;
+                Dashboard.OnSearchGroups -= FilterBySearchBar;
+                Dashboard.OnSearchGroups += FilterBySearchBar;
             }
 
             isSubscribed = true;
