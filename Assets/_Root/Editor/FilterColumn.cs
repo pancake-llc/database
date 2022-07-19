@@ -53,7 +53,7 @@ namespace Pancake.Database
         private void RebuildCustomGroups()
         {
             CustomGroups = Builder.GetAllAssetsInProject<CustomGroup>();
-            CustomGroupsFoldout = new Foldout {text = "Custom Data Groups"};
+            CustomGroupsFoldout = new Foldout {text = "Custom Groups"};
             CustomGroupsFoldout.contentContainer.style.marginLeft = -5;
             CustomGroups.Sort((x, y) => string.CompareOrdinal(x.Title, y.Title));
 
@@ -74,9 +74,9 @@ namespace Pancake.Database
 
         private void RebuildStaticGroups()
         {
-            DefaultGroupsFoldout = new Foldout {text = "Class Hierarchy"};
+            DefaultGroupsFoldout = new Foldout {text = "Static Groups"};
             DefaultGroupsFoldout.contentContainer.style.marginLeft = -5;
-            DefaultGroupsFoldout.style.marginLeft = 5;
+            //DefaultGroupsFoldout.style.marginLeft = 5;
 
             ScrollElement.Add(DefaultGroupsFoldout);
 

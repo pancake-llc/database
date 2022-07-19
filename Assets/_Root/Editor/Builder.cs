@@ -7,7 +7,6 @@ using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditor.Callbacks;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Pancake.Database
 {
@@ -65,20 +64,20 @@ namespace Pancake.Database
             var processedAssemblyNames = new List<string>();
 
             // ** ASSEMBLY TOP LEVEL
-            foreach (var assy in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (var ab in AppDomain.CurrentDomain.GetAssemblies())
             {
-                string assyName = assy.GetName().Name;
+                string assyName = ab.GetName().Name;
 
                 // ignore dynamic, blacklisted and duplicates
-                if (assy.IsDynamic || AssemblyBlacklist.Any(ignored => assyName.StartsWith(ignored)) || processedAssemblyNames.Any(n => n == assyName)) continue;
+                if (ab.IsDynamic || Enumerable.Any(AssemblyBlacklist, ignored => assyName.StartsWith(ignored)) || Enumerable.Any(processedAssemblyNames, n => n == assyName)) continue;
 
                 // ** TOP ASSEMBLY REFERERENCED LEVEL
-                foreach (var referencedAssembly in assy.GetReferencedAssemblies())
+                foreach (var referencedAssembly in ab.GetReferencedAssemblies())
                 {
                     if (referencedAssembly.Name != assemblyName.Name) continue;
 
                     // if it does reference it, we can get all the classes inside it and make groups.
-                    var validDataClasses = BuildStaticGroupsFromAssembly(assy);
+                    var validDataClasses = BuildStaticGroupsFromAssembly(ab);
 
                     // find all of the assets for that group Type and add them into the DB
                     foreach (var x in validDataClasses) Data.Database.SetStaticGroup(x);
@@ -91,12 +90,12 @@ namespace Pancake.Database
             processedAssemblyNames.Add(assembly.GetName().Name);
         }
 
-        private static List<StaticGroup> BuildStaticGroupsFromAssembly(Assembly assy)
+        private static List<StaticGroup> BuildStaticGroupsFromAssembly(Assembly assembly)
         {
             var result = new List<StaticGroup>();
 
             // ** ASSEMBLY LEVEL
-            var groups = assy.GetExportedTypes().Where(t => t.IsSubclassOf(typeof(Entity)) || t == typeof(Entity)).GroupBy(t => t.Namespace);
+            var groups = assembly.GetExportedTypes().Where(t => t.IsSubclassOf(typeof(Entity)) && t != typeof(CustomGroup)).GroupBy(t => t.Namespace);
 
             // Find all of the valid types and make group instances for them.
             // ** NAMESPACE LEVEL
@@ -105,8 +104,7 @@ namespace Pancake.Database
                 // ** TYPE LEVEL
                 foreach (var type in namespaceGroup)
                 {
-                    var group = new StaticGroup(type) {Type = type};
-                    group.Content = GetAllDataEntitiesOfTypeInProject(type);
+                    var group = new StaticGroup(type) {Type = type, Content = GetAllDataEntitiesOfTypeInProject(type)};
                     result.Add(group);
                 }
             }
