@@ -1,8 +1,8 @@
 {
   "name": "com.pancake.database",
   "displayName": "Database",
-  "description": "Provide friendly and useful edit or create game database for Unity 3D using NoSQL Document Store in a single data file",
-  "version": "0.0.1",
+  "description": "Provide friendly and useful edit or create game database for Unity 3D using ScriptableObject Store in a single data file",
+  "version": "1.0.0",
   "unity": "2021.1",
   "author": {
     "name": "yenmoc",
