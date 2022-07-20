@@ -124,7 +124,7 @@ namespace Pancake.Database
         private static readonly StyleColor ButtonInactive = new StyleColor(Color.gray);
         private static readonly StyleColor ButtonActive = new StyleColor(Color.white);
 
-        [MenuItem("Tools/Pancake/Database Dashboard %#d", priority = 0)]
+        [MenuItem("Tools/Pancake/Database/Dashboard %#d", priority = -1000)]
         public static void Open()
         {
             if (instance != null)

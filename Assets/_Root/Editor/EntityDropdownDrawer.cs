@@ -7,20 +7,20 @@ using UnityEngine;
 
 namespace Pancake.Database
 {
-    [CustomPropertyDrawer(typeof(AssetDropdownAttribute))]
-    public class AssetDropdownDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(EntityDropdownAttribute))]
+    public class EntityDropdownDrawer : PropertyDrawer
     {
         public static List<Entity> content = new List<Entity>();
         public static SerializedProperty property;
         public static Type type;
 
-        private static AssetDropdownAttribute dropdownAttribute;
+        private static EntityDropdownAttribute dropdownAttribute;
         private static string[] contentNames;
         private static bool isClean;
 
         private static void RefreshContent(SerializedProperty property, Entity currentTarget)
         {
-            AssetDropdownDrawer.property = property;
+            EntityDropdownDrawer.property = property;
             if (!isClean) content = AllDataEntity(dropdownAttribute);
             isClean = true;
         }
@@ -29,9 +29,9 @@ namespace Pancake.Database
         {
             if (property == null) return;
 
-            AssetDropdownDrawer.property = property;
+            EntityDropdownDrawer.property = property;
 
-            dropdownAttribute = (AssetDropdownAttribute) attribute;
+            dropdownAttribute = (EntityDropdownAttribute) attribute;
             type = dropdownAttribute.SourceType;
 
             // find the target object of the property field in the list of items in the project
@@ -57,7 +57,7 @@ namespace Pancake.Database
             GUI.Label(left, property.displayName);
 
             // insert the fancy dropdown
-            var obj = (Entity) AssetDropdownDrawer.property.objectReferenceValue;
+            var obj = (Entity) EntityDropdownDrawer.property.objectReferenceValue;
             string frontlabel = obj == null ? "(None)" : obj.Title;
             if (GUI.Button(mid, new GUIContent(frontlabel), EditorStyles.popup))
             {
@@ -98,7 +98,7 @@ namespace Pancake.Database
             property.serializedObject.ApplyModifiedProperties();
         }
 
-        private static List<Entity> AllDataEntity(AssetDropdownAttribute att)
+        private static List<Entity> AllDataEntity(EntityDropdownAttribute att)
         {
             var list = new List<Entity> {ScriptableObject.CreateInstance<None>()};
             string[] guids = AssetDatabase.FindAssets($"t:{att.SourceType}");

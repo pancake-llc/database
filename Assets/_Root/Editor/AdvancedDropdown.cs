@@ -33,8 +33,8 @@ namespace Pancake.Database
 
         protected override AdvancedDropdownItem BuildRoot()
         {
-            var root = new AdvancedDropdownItem(AssetDropdownDrawer.type.ToString());
-            foreach (var data in AssetDropdownDrawer.content)
+            var root = new AdvancedDropdownItem(EntityDropdownDrawer.type.ToString());
+            foreach (var data in EntityDropdownDrawer.content)
             {
                 root.AddChild(new EntityDropdownItem(data.Title, data));
             }
@@ -45,7 +45,7 @@ namespace Pancake.Database
         protected override void ItemSelected(AdvancedDropdownItem item)
         {
             var entity = ((EntityDropdownItem) item).entity;
-            AssetDropdownDrawer.ItemSelected(targetProperty, entity);
+            EntityDropdownDrawer.ItemSelected(targetProperty, entity);
             targetProperty.serializedObject.ApplyModifiedProperties();
         }
     }

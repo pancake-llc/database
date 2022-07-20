@@ -32,8 +32,7 @@ namespace Pancake.Database
         {
             if (Data.Database == null)
             {
-                Debug.LogWarning(
-                    "Data DB not found. Is this the first time loading it? You may want to restart the editor and run the Data Upgrader at 'Tools/Pancake/DB/Data Upgrader'.");
+                Debug.LogWarning("Database not found. Please create via create asset menu 'Pancake/Create Database'");
                 return;
             }
 
@@ -69,7 +68,8 @@ namespace Pancake.Database
                 string assyName = ab.GetName().Name;
 
                 // ignore dynamic, blacklisted and duplicates
-                if (ab.IsDynamic || Enumerable.Any(AssemblyBlacklist, ignored => assyName.StartsWith(ignored)) || Enumerable.Any(processedAssemblyNames, n => n == assyName)) continue;
+                if (ab.IsDynamic || Enumerable.Any(AssemblyBlacklist, ignored => assyName.StartsWith(ignored)) ||
+                    Enumerable.Any(processedAssemblyNames, n => n == assyName)) continue;
 
                 // ** TOP ASSEMBLY REFERERENCED LEVEL
                 foreach (var referencedAssembly in ab.GetReferencedAssemblies())
@@ -153,47 +153,18 @@ namespace Pancake.Database
             UnityEditor.EditorUtility.SetDirty(Data.Database);
         }
 
-        //[MenuItem("Tools/Pancake/DB/Data Key Upgrader (safe)", priority = 100)]
-        public static void DataUpgrader()
-        {
-            bool proceed = UnityEditor.EditorUtility.DisplayDialog("Upgrade Data",
-                "This will find every Entity in the project that has a key of int.MinValue and assign it a new one.",
-                "Proceed",
-                "Abort");
-            if (!proceed) return;
-
-            if (Data.Database == null)
-            {
-                Debug.Log("DB Not found. Please restart the editor and open Data Dashboard.");
-                return;
-            }
-
-            var data = GetAllDataEntitiesOfTypeInProject(typeof(Entity));
-            var changed = 0;
-            foreach (var x in data.Where(x => string.IsNullOrEmpty(x.ID)))
-            {
-                x.ID = Ulid.NewUlid().ToString();
-                UnityEditor.EditorUtility.SetDirty(x);
-                changed++;
-            }
-
-            Reload();
-
-            UnityEditor.EditorUtility.DisplayDialog("Complete", $"Changed {changed} entity keys.", "Ok");
-        }
-
-        //[MenuItem("Tools/Pancake/DB/Data Key Reset (danger)", priority = 100)]
-        public static void DataReset()
+        [MenuItem("Tools/Pancake/Database/Recreate Id All Entity (DANGER)", priority = 100)]
+        public static void ResetIdAllEntity()
         {
             bool proceed = UnityEditor.EditorUtility.DisplayDialog("Reset Data Keys",
-                "This will find every Entity in the project and assign a new DB Key to each one.",
+                "This will find every Entity in the project and assign a new id to each one.",
                 "Proceed",
                 "Abort");
             if (!proceed) return;
 
             if (Data.Database == null)
             {
-                Debug.Log("DB Not found. Please restart the editor and open Data Dashboard.");
+                Debug.Log("Database not found. Please create via create asset menu 'Pancake/Create Database'");
                 return;
             }
 
@@ -214,11 +185,11 @@ namespace Pancake.Database
         /// <summary>
         /// Forces a refresh of assets serialization.
         /// </summary>
-        //[MenuItem("Tools/Pancake/DB/Reimport Assets - By Type (safe)", priority = 100)]
+        [MenuItem("Tools/Pancake/Database/Reimport Entities - By Type (Safe)", priority = 100)]
         public static void ReimportAllByType()
         {
             bool confirm = UnityEditor.EditorUtility.DisplayDialog("Reimport Data Asset Files",
-                $"Reimport all of the Data Data Assets?\n\n" +
+                $"Reimport all of the Entity Data Assets?\n\n" +
                 $"This reimports all Entity type Assets. Won't fix issues related to mismatching class/file names.\n\n This is generally a safe operation.",
                 "Proceed",
                 "Abort!");
@@ -251,7 +222,7 @@ namespace Pancake.Database
         /// <summary>
         /// Forces a refresh of assets serialization.
         /// </summary>
-        //[MenuItem("Tools/Pancake/DB/Reimport Assets - By Name (safe)", priority = 100)]
+        [MenuItem("Tools/Pancake/Database/Reimport Entities - By Name (Safe)", priority = 100)]
         public static void ReimportAllByName()
         {
             bool confirm = UnityEditor.EditorUtility.DisplayDialog("Reimport Data Asset Files",
@@ -285,7 +256,7 @@ namespace Pancake.Database
             }
         }
 
-        //[MenuItem("Tools/Pancake/DB/Cleanup Data (semi-safe)", priority = 100)]
+        [MenuItem("Tools/Pancake/Database/Cleanup Data (Semi-Safe)", priority = 100)]
         public static void CleanupStorageFolder()
         {
             bool confirm = UnityEditor.EditorUtility.DisplayDialog("Cleanup Data",

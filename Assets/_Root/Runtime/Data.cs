@@ -22,18 +22,18 @@ namespace Pancake.Database
         }
 
         /// <summary>
-        /// Directly query the database for a specific key. This is the most efficient way to access data.
+        /// Directly query the database for a specific id. This is the most efficient way to access data.
         /// </summary>
-        /// <param name="key">The item ID</param>
+        /// <param name="id">The item ID</param>
         /// <returns>A reference to the <see cref="Entity"/>.</returns>
-        public static Entity Query(string key) { return Database.Query(key); }
+        public static Entity Query(string id) { return Database.Query(id); }
 
         /// <summary>
-        /// Directly query the database for a specific key. This is the most efficient way to access data.
+        /// Directly query the database for a specific id. This is the most efficient way to access data.
         /// </summary>
-        /// <param name="key">The item ID</param>
+        /// <param name="id">The item ID</param>
         /// <returns>A reference to the <see cref="Entity"/>.</returns>
-        public static Entity Q(string key) { return Database.Query(key); }
+        public static Entity Q(string id) { return Database.Query(id); }
 
         /// <summary>
         /// Slow way to get every item of a specific type.
