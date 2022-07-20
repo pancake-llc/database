@@ -235,6 +235,7 @@ namespace Pancake.Database
             SetCurrentGroup(CurrentSelectedGroup);
 
             onCreateNewEntityComplete = CreatedNewEntityCallback;
+            onCloneEntityComplete = CloneEntityCallback;
         }
 
         private void RebuildGroupColumn(bool fullRebuild = false)
@@ -349,7 +350,7 @@ namespace Pancake.Database
         {
             onCreateNewEntityStart?.Invoke();
             Entity newAsset = enityColumn.Create(t);
-            //OnCreateNewEntityComplete?.Invoke();
+            onCreateNewEntityComplete?.Invoke();
             return newAsset;
         }
 
@@ -368,6 +369,7 @@ namespace Pancake.Database
         }
 
         private static void CreatedNewEntityCallback() { Builder.Reload(); }
+        private static void CloneEntityCallback() { Builder.Reload(); }
 
         public static void RemoveAssetFromGroup()
         {

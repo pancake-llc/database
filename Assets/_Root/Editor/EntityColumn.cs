@@ -268,7 +268,6 @@ namespace Pancake.Database
             var asset = ScriptableObject.CreateInstance(t);
             AssetDatabase.CreateAsset(asset, assetPathAndName);
             var real = (Entity) AssetDatabase.LoadAssetAtPath<ScriptableObject>(assetPathAndName);
-
             Data.Database.Add(real, true);
             var group = Data.Database.GetStaticGroup(t);
             group.Add(real);
@@ -300,6 +299,7 @@ namespace Pancake.Database
             AssetDatabase.Refresh();
 
             var real = (Entity) AssetDatabase.LoadAssetAtPath<ScriptableObject>(assetPathAndName);
+            real.ID = Ulid.NewUlid().ToString();
             Dashboard.entitySearch.SetValueWithoutNotify(string.Empty);
 
             Rebuild();

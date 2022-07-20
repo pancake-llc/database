@@ -140,7 +140,16 @@ namespace Pancake.Database
                 if (iterator.propertyPath == "id" && obj.targetObject != null)
                 {
                     // build the container
-                    var container = new VisualElement {style = {flexGrow = 1, flexShrink = 1, alignItems = new StyleEnum<Align>(Align.Stretch), flexDirection = new StyleEnum<FlexDirection>(FlexDirection.Row)}};
+                    var container = new VisualElement
+                    {
+                        style =
+                        {
+                            flexGrow = 1,
+                            flexShrink = 1,
+                            alignItems = new StyleEnum<Align>(Align.Stretch),
+                            flexDirection = new StyleEnum<FlexDirection>(FlexDirection.Row)
+                        }
+                    };
 
                     propertyField.SetEnabled(false);
                     propertyField.style.flexGrow = 1;
@@ -166,18 +175,19 @@ namespace Pancake.Database
                     propertyField.style.flexShrink = 1;
 
                     // build the focus script button
-                    var focusButton = new Button(() => EditorGUIUtility.PingObject(obj.FindProperty("m_Script").objectReferenceValue));
-                    focusButton.text = "☲";
-                    focusButton.style.minWidth = 20;
-                    focusButton.style.maxWidth = 20;
-                    focusButton.tooltip = "Ping this Script";
+                    var focusButton = new Button(() =>
+                    {
+                        var objPing = obj.FindProperty("m_Script").objectReferenceValue;
+                        EditorGUIUtility.PingObject(objPing);
+                        Selection.activeObject = objPing;
+                    }) {text = "☲", style = {minWidth = 20, maxWidth = 20}, tooltip = "Ping this Script"};
 
                     // build the focus object button
-                    var focusAsset = new Button(() => EditorGUIUtility.PingObject(obj.targetObject));
-                    focusAsset.text = "☑";
-                    focusAsset.style.minWidth = 20;
-                    focusAsset.style.maxWidth = 20;
-                    focusAsset.tooltip = "Ping this Asset";
+                    var focusAsset = new Button(() =>
+                    {
+                        EditorGUIUtility.PingObject(obj.targetObject);
+                        Selection.activeObject = obj.targetObject;
+                    }) {text = "☑", style = {minWidth = 20, maxWidth = 20}, tooltip = "Ping this Entity"};
 
                     // draw it
                     container.Add(propertyField);
