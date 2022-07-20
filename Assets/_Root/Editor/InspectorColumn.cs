@@ -33,15 +33,15 @@ namespace Pancake.Database
             Dashboard.onCurrentEntityChanged += Rebuild;
             Dashboard.onDeleteEntityStart = InspectNothing;
 
-            this.name = "Inspector";
-            this.viewDataKey = "inspector";
-            this.style.flexShrink = 1f;
-            this.style.flexGrow = 1f;
-            this.style.paddingBottom = 10;
-            this.style.paddingLeft = 10;
-            this.style.paddingRight = 10;
-            this.style.paddingTop = 10;
-            this.Add(_scroll);
+            name = "Inspector";
+            viewDataKey = "inspector";
+            style.flexShrink = 1f;
+            style.flexGrow = 1f;
+            style.paddingBottom = 10;
+            style.paddingLeft = 10;
+            style.paddingRight = 10;
+            style.paddingTop = 10;
+            Add(_scroll);
         }
 
         public override void Rebuild()
@@ -122,8 +122,7 @@ namespace Pancake.Database
                             foreach (var h in headers)
                             {
                                 var actual = (HeaderAttribute) h;
-                                var header = new Label {text = actual.header};
-                                header.style.unityFontStyleAndWeight = FontStyle.Bold;
+                                var header = new Label {text = actual.header, style = {unityFontStyleAndWeight = FontStyle.Bold}};
                                 wrapper.Add(new Label {text = " "});
                                 wrapper.Add(header);
                             }
@@ -151,7 +150,7 @@ namespace Pancake.Database
                         }
                     };
 
-                    propertyField.SetEnabled(false);
+                    propertyField.SetEnabled(true);
                     propertyField.style.flexGrow = 1;
                     propertyField.style.flexShrink = 1;
 
@@ -164,11 +163,16 @@ namespace Pancake.Database
                 if (iterator.propertyPath == "m_Script" && obj.targetObject != null)
                 {
                     // build the container
-                    var container = new VisualElement();
-                    container.style.flexGrow = 1;
-                    container.style.flexShrink = 1;
-                    container.style.alignItems = new StyleEnum<Align>(Align.Stretch);
-                    container.style.flexDirection = new StyleEnum<FlexDirection>(FlexDirection.Row);
+                    var container = new VisualElement
+                    {
+                        style =
+                        {
+                            flexGrow = 1,
+                            flexShrink = 1,
+                            alignItems = new StyleEnum<Align>(Align.Stretch),
+                            flexDirection = new StyleEnum<FlexDirection>(FlexDirection.Row)
+                        }
+                    };
 
                     propertyField.SetEnabled(false);
                     propertyField.style.flexGrow = 1;
