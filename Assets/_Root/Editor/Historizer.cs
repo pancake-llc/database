@@ -1,37 +1,34 @@
-﻿
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
- 
+
 namespace Pancake.Database
 {
     public class Historizer : VisualElement
     {
-        private List<Entity> m_history;
-        private readonly VisualElement m_breadcrumbBar;
-        private List<Button> m_buttons; // todo highlight if current selection is inside history bar.
+        private List<Entity> _history;
+        private readonly VisualElement _breadcrumbBar;
+        private List<Button> _buttons; // todo highlight if current selection is inside history bar.
 
-        private const int MaxHistoryItems = 7;
-        private const int MaxNameLength = 16;
+        private const int MAX_HISTORY_ITEMS = 7;
+        private const int MAX_NAME_LENGTH = 16;
 
         public Historizer()
         {
-            m_breadcrumbBar = new ToolbarBreadcrumbs();
-            m_buttons = new List<Button>();
-            Add(m_breadcrumbBar);
+            _breadcrumbBar = new ToolbarBreadcrumbs();
+            _buttons = new List<Button>();
+            Add(_breadcrumbBar);
 
             style.flexGrow = 1;
             style.flexDirection = new StyleEnum<FlexDirection>(FlexDirection.Row);
 
             Dashboard.onCurrentEntityChanged -= AddAndHistorize;
             Dashboard.onCurrentEntityChanged += AddAndHistorize;
-            
+
             RestoreHistory();
             BuildBreadcrumbs();
         }
@@ -41,22 +38,23 @@ namespace Pancake.Database
         /// </summary>
         private void AddAndHistorize()
         {
-            if (m_history == null) m_history = new List<Entity>();
-            if (m_history.Count > 0 && m_history.Last() == Dashboard.CurrentSelectedEntity) return;
-            if (m_history.Contains(Dashboard.CurrentSelectedEntity)) return;
+            if (_history == null) _history = new List<Entity>();
+            if (_history.Count > 0 && _history.Last() == Dashboard.CurrentSelectedEntity) return;
+            if (_history.Contains(Dashboard.CurrentSelectedEntity)) return;
 
-            m_history.Add(Dashboard.CurrentSelectedEntity);
-            if (m_history.Count > MaxHistoryItems)
-            { 
-                m_history.Remove(m_history.First());
+            _history.Add(Dashboard.CurrentSelectedEntity);
+            if (_history.Count > MAX_HISTORY_ITEMS)
+            {
+                _history.Remove(_history.First());
             }
 
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < m_history.Count; i++)
+            for (int i = 0; i < _history.Count; i++)
             {
-                Entity assetFile = m_history[i];
+                Entity assetFile = _history[i];
                 sb.Append(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(assetFile)) + "|");
             }
+
             EditorSettings.Set(EditorSettings.ESettingKey.BreadcrumbBarGuids, sb.ToString());
             BuildBreadcrumbs();
         }
@@ -66,7 +64,7 @@ namespace Pancake.Database
         /// </summary>
         private void RestoreHistory()
         {
-            m_history = new List<Entity>();
+            _history = new List<Entity>();
             string guidblob = EditorSettings.Get(EditorSettings.ESettingKey.BreadcrumbBarGuids);
             if (string.IsNullOrEmpty(guidblob)) return;
 
@@ -74,29 +72,29 @@ namespace Pancake.Database
             foreach (string guid in split)
             {
                 if (guid == string.Empty || guid.Contains('|')) continue;
-                m_history.Add(AssetDatabase.LoadAssetAtPath<Entity>(AssetDatabase.GUIDToAssetPath(guid)));
+                _history.Add(AssetDatabase.LoadAssetAtPath<Entity>(AssetDatabase.GUIDToAssetPath(guid)));
             }
         }
 
         private void BuildBreadcrumbs()
         {
-            m_breadcrumbBar.Clear();
-            m_buttons = new List<Button>();
-            StyleBackground crumbFirst = (Texture2D)EditorGUIUtility.IconContent("breadcrump left").image;
-            StyleBackground crumb = (Texture2D)EditorGUIUtility.IconContent("breadcrump mid").image;
+            _breadcrumbBar.Clear();
+            _buttons = new List<Button>();
+            StyleBackground crumbFirst = (Texture2D) EditorGUIUtility.IconContent("breadcrump left").image;
+            StyleBackground crumb = (Texture2D) EditorGUIUtility.IconContent("breadcrump mid").image;
 
-            if (m_history == null || m_history.Count == 0) return;
-            for (int i = 0; i < m_history.Count; i++)
+            if (_history == null || _history.Count == 0) return;
+            for (int i = 0; i < _history.Count; i++)
             {
-                if (m_history[i] == null) continue;
+                if (_history[i] == null) continue;
                 int index = i;
 
                 string title = "      blank";
-                if (m_history[i].Title.Length > 0)
+                if (_history[i].Title.Length > 0)
                 {
-                    title = m_history[i].Title.Length > MaxNameLength
-                        ? "      " + m_history[i].Title.Substring(0, MaxNameLength - 2) + "..."
-                        : "      " + m_history[i].Title;
+                    title = _history[i].Title.Length > MAX_NAME_LENGTH
+                        ? "      " + _history[i].Title.Substring(0, MAX_NAME_LENGTH - 2) + "..."
+                        : "      " + _history[i].Title;
                 }
 
                 Button btn = new Button(() => GoToHistoryIndex(index));
@@ -116,7 +114,7 @@ namespace Pancake.Database
                 btn.style.unitySliceRight = 15;
                 btn.style.marginTop = 0;
                 btn.style.marginBottom = 0;
-                btn.style.marginLeft = -15; 
+                btn.style.marginLeft = -15;
                 btn.style.marginRight = 0;
                 btn.style.flexGrow = 1;
                 btn.style.flexShrink = 1;
@@ -129,15 +127,15 @@ namespace Pancake.Database
 
                 btn.text = title;
 
-                m_buttons.Add(btn);
-                m_breadcrumbBar.Add(btn);
+                _buttons.Add(btn);
+                _breadcrumbBar.Add(btn);
             }
         }
 
         public void GoToHistoryIndex(int index)
         {
-            if (m_history[index] == null) return;
-            Dashboard.InspectAssetRemote(m_history[index], m_history[index].GetType());
+            if (_history[index] == null) return;
+            Dashboard.InspectAssetRemote(_history[index], _history[index].GetType());
         }
     }
 }
